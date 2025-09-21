@@ -3,48 +3,35 @@ import EventEmitter from 'node:events';
 export default class Gameboard {
     constructor(length, quantity = 8 /*quantity is total boats, half per player*/, boatMax = 6, boatMin = 3) {
         this.length = length
-        this.turn = 0
-        this.gameFinished = false
+        this.allShipsDead = false
 
         this.search = {}
 
-        this.boardP1 = []
-        this.aliveP1 = [] // surviving boats
-
-        this.boardP2 = []
-        this.aliveP2 = [] // surviving boats
+        this.board = []
+        this.boardOffense = []
+        this.alive = []
 
         for (let i = 0; i < this.length ** 2; i++) {
-            this.boardP1.push(0)
-            this.boardP2.push(0)
+            this.board.push(0)
         }
 
         this.events = new EventEmitter()
     }
 
-    place(array, player) { // square is a decimal, 0 through board.length ** 2
-        let board, alive
-
-        if (player === 1) {
-            board = this.boardP1
-            alive = this.aliveP1
-        } else if (player === 2) {
-            board = this.boardP2
-            alive = this.aliveP2
-        } else {
-            throw new Error('Invalid player specified')
-        }
+    place(array) { // square is a decimal, 0 through board.length ** 2
+        let board = this.board
+        let length = this.length
+        let alive = this.alive
 
         let orientation
         for (let i = array.length - 1; i > 0; i--) {
-            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) % this.length !== 0) { // check if boat is disjointed, i.e., skips a square
-                i = 0
+            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) / length !== 1) { // check if boat is disjointed, i.e., skips a square
 
                 return false
             }
             if (array[i] - array[i - 1] === 1) {
                 orientation = 'horizontal'
-            } else if ((array[i] - array[i - 1]) % this.length === 0) {
+            } else if ((array[i] - array[i - 1]) % length === 0) {
                 orientation = 'vertical'
             }
         }
@@ -63,7 +50,7 @@ export default class Gameboard {
         }
 
         if (orientation === 'horizontal') { // check to make sure horizontal boat doesn't wrap
-            let mod = this.length
+            let mod = length
 
             while (array[0] > mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
                 mod *= 2
@@ -76,56 +63,45 @@ export default class Gameboard {
             }
         }
 
-        if (sum > 0) {
-            return false
-        } else {
-            array.forEach((square) => {
-                board[square] = 1 // fill empty squares with boat
+        array.forEach((square) => {
+            board[square] = 1 // fill empty squares with boat
 
-                this.search[`${square} ${player}`] = alive.length
-                alive.push(square)
-            })
-            return true
-        }
+            this.search[`${square}`] = alive.length
+            alive.push(square)
+        })
+        return true
     }
 
-    attack(square) {
-        let board, alive, player
-
-        if (this.turn % 2 === 0) {
-            player = 1
-            board = this.boardP2
-            alive = this.aliveP2
-        } else {
-            player = 2
-            board = this.boardP1
-            alive = this.aliveP1
-        }
-
-        if (board[square] === 1) {
-            board[square] = 2 // dead square
-
-            const index = this.search[`${square} ${(this.turn % 2) + 1}`] // remove square from surviving boats
-            alive.splice(index, 1)
-
-            if (alive.length === 0) { // check if all boats are dead
-                this.gameFinished = true
-
-                this.winner = player
-            } else {
-                if (player === 1) { // switch players to indicate the targeted player
-                    player = 2
-                } else {
-                    player = 1
-                }
-            }
-
-            this.events.emit('hit', { pos: square, turn: this.turn, gameFinished: this.gameFinished, player: player })
-            this.turn++
+    attack(square, player) {
+        if (player.board === this) { // If true, owner of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
+            this.boardOffense.push(square)
 
             return true
-        } else if (board[square] === 2 || board[square] === 3 /*3 is a previous miss*/) { // tried to attack previously-attacked square, try again w/o switching turns
-            return false
+        } else {
+            let board = this.board
+            let alive = this.alive
+
+            if (board[square] === 1) {
+                board[square] = 2 // dead square
+
+                const index = this.search[`${square}`] // remove square from surviving boats
+                alive.splice(index, 1)
+
+                if (alive.length === 0) { // check if all boats are dead
+                    this.allShipsDead = true
+                }
+
+                this.events.emit('hit', { pos: square, allShipsDead: this.allShipsDead })
+
+                return true
+            } else if (board[square] === 2 || board[square] === 3 /*3 is a previous miss*/) { // tried to attack previously-attacked square, try again w/o switching turns
+                return false
+            } else {
+                board[square] = 3 // missed attack
+
+                this.events.emit('miss', { pos: square })
+                return false
+            }
         }
     }
 }
