@@ -6,15 +6,117 @@ board.boatMax = 6 // default 6
 board.boatMin = 3 // default 3
 
 test('Place horizontal boat', () => {
-    const board = new Gameboard(64)
+    const board = new Gameboard(8)
 
-    expect(board.place([0,1,2,3,4,5,6], 1)).toBeTruthy()
+    expect(board.place([0,1,2,3,4,5], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(6)
 })
 
 test('Place vertical boat', () => {
-    const board = new Gameboard(64)
+    const board = new Gameboard(8)
 
     expect(board.place([9,17,25,33,41,49], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(6)
+})
+
+test('Place invalid disjointed boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([0,5,6,4,8,10], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid horizontal boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([0,1,2,4,5,6], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid vertical boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([8,17,25,33,41,49], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid offscreen horizontal boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([-1,0,1,2,3], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid offscreen vertical boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([25,33,41,49,57,65], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid offscreen wrapping horizontal boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([5,6,7,8,9], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid offscreen wrapping vertical boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([49,57,2,10], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(0)
+})
+
+test('Place invalid duplicate horizontal boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([0,1,2,3,4,5], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(6)
+    expect(board.place([0,1,2,3,4,5], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(6)
+})
+
+test('Place invalid duplicate horizontal boat single overlap', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([0,1,2,3], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(4)
+    expect(board.place([3,4,5,6], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(4)
+})
+
+test('Place invalid duplicate vertical boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([9,17,25,33,41,49], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(6)
+    expect(board.place([9,17,25,33,41,49], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(6)
+})
+
+test('Place invalid duplicate vertical boat single overlap', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([9,17,25,33], 1)).toBeTruthy()
+    expect(board.aliveP1.length).toBe(4)
+    expect(board.place([33,41,49,57], 1)).toBeFalsy()
+    expect(board.aliveP1.length).toBe(4)
+})
+
+test('Hit boat', () => {
+    const board = new Gameboard(8)
+    board.turn = 1 // for testing so P2 attacks P1
+
+    const listener = jest.fn()
+
+    board.events.on('hit', listener)
+
+    expect(board.place([9,17,25,33,41,49], 1)).toBeTruthy()
+    expect(board.attack(9)).toBeTruthy() // Probably the board should take as little information as possible.
+
+    expect(listener).toHaveBeenCalled()
+    expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9, turn: 1, gameFinished: false, player: 1 })) // The listener represents either a player object or boat object that listeners for the board to emit hit events
 })
 
 // test('Place all boats', () => {
@@ -29,18 +131,3 @@ test('Place vertical boat', () => {
 //     expect(board.place([27,28,29])).toBeFalsy() // P1, 3, 3
 //     expect(board.place([]))
 // })
-
-test('Hit boat', () => {
-    const board = new Gameboard(64)
-    board.turn = 1 // for testing so P2 attacks P1
-
-    const listener = jest.fn()
-
-    board.events.on('hit', listener)
-
-    expect(board.place([9,17,25,33,41,49], 1)).toBeTruthy()
-    expect(board.attack(9)).toBeTruthy() // Probably the board should take as little information as possible.
-
-    expect(listener).toHaveBeenCalled()
-    expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9, turn: 1, gameFinished: false })) // The listener represents either a player object or boat object that listeners for the board to emit hit events
-})
