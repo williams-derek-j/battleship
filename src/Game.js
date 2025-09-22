@@ -1,21 +1,24 @@
 import Player from './Player'
-import EventEmitter from "node:events";
+import EventEmitter from "./events";
 
 export default class Game {
     constructor(container, settings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
-        if (settings.length !== 4) {
+        if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
+        console.log('hey')
         while (settings.shipsPerPlayer !== settings.shipLengths.length) {
             settings.shipLengths.forEach(length => {
                 settings.shipLengths.push(length)
             })
         }
+        this.container = container
+        this.events = new EventEmitter()
 
         this.players = []
         this.survivors = []
         for (let i = 0; i < settings.players; i++) {
-            const player = new Player(`Player${i}`, i, settings);
+            const player = new Player(`Player${i}`, i, this.events, settings);
 
             // player.events.on('Attack', this.sendAttempt)
             player.events.on('Hit', this.sendHit)
@@ -26,7 +29,6 @@ export default class Game {
             this.survivors.push(player)
             this.players.push(player)
         }
-        this.events = new EventEmitter()
 
         this._turn = 1
 
@@ -50,11 +52,24 @@ export default class Game {
     }
 
     play() {
-        while (this.survivors > 1) {
-            const render = this.survivors[this.turn].render()
+        console.log('hey2', this.survivors, this.container)
+        if (this.survivors.length > 1) {
+            console.log('hey3')
+            const player = this.survivors[this.turn]
 
-            this.turn += 1
-            this.play()
+            player.render = undefined // create render
+            const render = player.render
+
+            // while (this.container.firstChild) {
+            //     this.container.removeChild(this.container.lastChild)
+            // }
+            console.log('render', render)
+            this.container.appendChild(render)
+
+            this.events.on('Attack', (event) => {
+                this.turn += 1
+                this.play()
+            })
         }
     }
 

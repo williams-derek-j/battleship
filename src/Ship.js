@@ -1,4 +1,4 @@
-import EventEmitter from "node:events";
+import EventEmitter from "./events";
 
 export default class Ship {
     constructor(length) {
@@ -9,7 +9,7 @@ export default class Ship {
         this._health = length
         this.sunk = false
 
-        this.vertical = true
+        this.vertical = false
         this.reversed = false
 
         this.events = new EventEmitter()
@@ -33,6 +33,7 @@ export default class Ship {
 
             if (this.pos.length === 0) {
                 render.addEventListener('dragstart', (event) => {
+                    console.log('dragstar', event)
                     if (this.pos.length === 0) {
                         render.addEventListener('onkeydown', (event) => { // rotate ship while dragging
                             if (event.code === 'KeyR') {
@@ -55,9 +56,9 @@ export default class Ship {
     }
 
     get render() {
-        if (this._render === null) {
-            this.render = undefined // create render
-        }
+        // if (this._render === null) {
+        //     this.render = undefined // create render
+        // }
         return this._render
     }
 

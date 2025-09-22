@@ -1,4 +1,4 @@
-import EventEmitter from 'node:events';
+import EventEmitter from './events';
 
 export default class Gameboard {
     constructor(length) {
@@ -21,6 +21,7 @@ export default class Gameboard {
     }
 
     set renderDefense(callback) {
+        console.log('rd', this)
         if (callback !== null) {
             if (callback || callback === undefined) {
                 const board = document.createElement('div')
@@ -29,22 +30,27 @@ export default class Gameboard {
 
                 for (let i = 0; i < this.length; i++) {
                     const row = document.createElement('div')
+                    row.classList.add('row')
+                    console.log(row)
 
                     for (let j = 0; j < this.length; j++) {
-                        const index = ((board.length * this.length) + row.length)
+                        const index = ((board.children.length * this.length) + row.children.length)
 
                         const square = document.createElement('div')
                         square.classList.add('square')
+                        square.setAttribute('data-index', index.toString())
 
                         if (callback !== undefined) {
                             square.addEventListener('dragover', (event) => {
                                 event.preventDefault()
                             })
                             square.addEventListener('drop', (event) => {
+                                console.log('drop', index, this, square, square['data-index'])
                                 event.preventDefault()
 
                                 const dropped = JSON.parse(event.dataTransfer.getData('text'))
                                 const length = dropped.length
+                                console.log('dropped length', length)
                                 const vertical = dropped.vertical
                                 const reversed = dropped.reversed
 
@@ -74,7 +80,30 @@ export default class Gameboard {
                                         }
                                     }
                                 }
-                                callback(array)
+                                if(callback(array) === true) {
+                                    square.classList.add('occupied')
+
+                                    let sibling = square
+                                    if (vertical === false) {
+                                        if (reversed === false) {
+                                            for (let i = 1; i < array.length; i++) {
+                                                console.log('y', sibling, sibling.nextElementSibling)
+                                                sibling.nextElementSibling.classList.add('occupied')
+                                                sibling = sibling.nextElementSibling
+                                            }
+                                        } else if (reversed === true) {
+                                            for (let i = 1; i < array.length; i++) {
+                                                console.log('y2', sibling, sibling.nextElementSibling)
+                                                sibling.previousElementSibling.classList.add('occupied')
+                                                sibling = sibling.previousElementSibling
+                                            }
+                                        }
+                                    } else if (vertical === true) {
+
+                                    }
+                                } else {
+                                    console.log('invalid placement')
+                                }
                             })
                         } else {
                             if (this.defense[index] === 1) {
@@ -108,7 +137,11 @@ export default class Gameboard {
     set renderOffense(callback) {
         if (callback !== null) {
             if (typeof callback !== 'function') {
-                this._renderOffense = callback // callback is actually a reference to a DOM element
+                if (callback === undefined) {
+                    throw Error('Callback is undefined! Callback must be a function for squares to call upon click event.')
+                } else {
+                    this._renderOffense = callback // callback is actually a reference to a DOM element
+                }
             } else {
                 const board = document.createElement('div')
                 board.classList.add('board')
@@ -191,7 +224,7 @@ export default class Gameboard {
             }
 
             for (let square of array) {
-                if (square > mod) {
+                if (square >= mod) {
                     return false // horizontal boat wraps around from right to left
                 }
             }
@@ -200,6 +233,7 @@ export default class Gameboard {
         array.forEach((square) => {
             board[square] = 1 // fill empty squares with boat
         })
+        console.log('n')
         return true
     }
 
