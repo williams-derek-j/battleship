@@ -9,6 +9,7 @@ export default class Player {
         this.defeated = false
 
         this.board = new Gameboard(gameSettings.boardLength);
+        this._render = null
         this.events = new EventEmitter()
 
         this.allShipsPlaced = false
@@ -28,47 +29,134 @@ export default class Player {
         this.dead = []
     }
 
-    render() {
-        const board = document.createElement('div')
-        board.classList.add('board')
+    set render(render) {
+        if (render !== undefined) {
+            this._render = render
+        } else {
+            const boardLength = Math.sqrt(this.board.length)
+            const render = document.createElement('div')
 
-        for (let i = 0; i < gameSettings.boardLength; i++) {
-            const row = document.createElement('div')
+            if (this.allShipsPlaced === false) {
+                const shipsContainer = document.createElement('div')
 
-            for (let j = 0; j < gameSettings.boardLength; j++) {
-                const square = document.createElement('div')
+                this.ships.forEach((ship) => {
+                    if (ship.pos.length === 0) { // check to make sure ship hasn't bene placed yet
+                        shipsContainer.appendChild(ship.render())
+                    }
+                })
+                render.appendChild(shipsContainer)
+            } else {
+                const offense = document.createElement('div')
+                offense.classList.add('offense')
 
-                if (this.allShipsPlaced === true) {
-                    square.addEventListener('click', (event) => {
-                        this.attack(square)
-                    })
-                } else {
-                    square.addEventListener('dragover', (event) => {
-                        event.preventDefault()
-                    })
-                    square.addEventListener('drop', (event) => {
-                        event.preventDefault()
+                for (let i = 0; i < boardLength; i++) {
+                    const row = document.createElement('div')
 
-                        const dropped = JSON.parse(event.dataTransfer.getData('text'))
-                        const length = dropped.length
-                        const vertical = dropped.vertical
+                    for (let j = 0; j < boardLength; j++) {
+                        const index = ((offense.length * boardLength) + row.length)
 
-                        if (!vertical) {
+                        const square = document.createElement('div')
+                        square.classList.add('square')
+                        square.classList.add('offense')
 
+                        if (this.board.offense[index] === 1) {
+                            square.classList.add('miss')
+                        } else if (this.board.offense[index] === 2) {
+                            if (square.classList.contains('miss')) {
+                                square.classList.remove('miss')
+                            }
+                            square.classList.add('hit')
                         }
-                    })
-                }
 
-                row.append(square)
+                        if (this.allShipsPlaced === true ) {
+                            square.addEventListener('click', (event) => {
+                                this.attack(index)
+                            })
+                        }
+                        row.append(square)
+                    }
+                    offense.append(row)
+                }
+                render.appendChild(offense)
             }
-            board.append(row)
+
+            const board = document.createElement('div')
+            board.classList.add('board')
+
+            for (let i = 0; i < boardLength; i++) {
+                const row = document.createElement('div')
+
+                for (let j = 0; j < boardLength; j++) {
+                    const index = ((board.length * boardLength) + row.length)
+
+                    const square = document.createElement('div')
+                    square.classList.add('square')
+
+                    if (this.allShipsPlaced === false ) {
+                        square.addEventListener('dragover', (event) => {
+                            event.preventDefault()
+                        })
+                        square.addEventListener('drop', (event) => {
+                            event.preventDefault()
+
+                            const dropped = JSON.parse(event.dataTransfer.getData('text'))
+                            const length = dropped.length
+                            const vertical = dropped.vertical
+                            const reversed = dropped.reversed
+
+                            const array = []
+                            if (!vertical) {
+                                if (!reversed) {
+                                    for (let i = 0; i < length; i++) {
+                                        if (!reversed) {
+                                            array.push(index + i)
+                                        }
+                                    }
+                                } else {
+                                    for (let i = length - 1; i >= 0; i--) {
+                                        if (!reversed) {
+                                            array.push(index - i)
+                                        }
+                                    }
+                                }
+                            } else {
+                                if (!reversed) {
+                                    for (let i = 0; i < length; i++) {
+                                        array.push(index + (i * boardLength))
+                                    }
+                                } else {
+                                    for (let i = length - 1; i >= 0; i--) {
+                                        array.push(index - (i * boardLength))
+                                    }
+                                }
+                            }
+                            this.place(array)
+                        })
+                    } else {
+                        if (this.board.defense[index] === 1) {
+                            square.classList.add('ship')
+                        } else if (this.board.defense[index] === 2) {
+                            square.classList.add('damage')
+                        } else if (this.board.defense[index] === 3) {
+                            square.classList.add('miss')
+                        }
+                    }
+
+                    row.append(square)
+                }
+                board.append(row)
+            }
+            render.appendChild(board)
+
+            this._render = render
+            return render
         }
     }
 
     place(array) {
         if (this.board.place(array) === true) { // if true, successful placement
             this.ships.forEach((ship) => {
-                if (ship.length === array.length) {
+                if (ship.length === array.length) { // this is a weakness, need a better way to identify ships -- would need ship drop event to transfer entire ship object
                     ship.pos = array
 
                     for (let ship of this.ships) {

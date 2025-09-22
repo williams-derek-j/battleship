@@ -4,19 +4,19 @@ export default class Gameboard {
     constructor(length) {
         this.length = length
 
-        this.board = []
-        this.boardOffense = []
+        this.defense = []
+        this.offense = []
 
         for (let i = 0; i < this.length ** 2; i++) {
-            this.board.push(0)
-            this.boardOffense.push(0)
+            this.defense.push(0)
+            this.offense.push(0)
         }
 
         // this.events = new EventEmitter()
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
-        let board = this.board
+        const board = this.defense
 
         let orientation
         for (let i = array.length - 1; i > 0; i--) {
@@ -66,19 +66,21 @@ export default class Gameboard {
 
     attack(square, player) {
         if (player.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
-            if (this.boardOffense[square] === 0) { // check validity of attack
-                this.boardOffense[square] = 1
+            const board = this.offense
+
+            if (board[square] === 0) { // check validity of attack
+                board[square] = 1
 
                 return true
-            } else if (this.boardOffense[square] === 1) {
-                this.boardOffense[square] = 2 // successful attack
+            } else if (board[square] === 1) {
+                board[square] = 2 // successful attack
 
                 return null
             } else {
                 return false
             }
         } else { // parent of board is being attacked
-            let board = this.board
+            const board = this.defense
 
             if (board[square] === 1) {
                 board[square] = 2 // dead square

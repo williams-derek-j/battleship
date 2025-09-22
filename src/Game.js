@@ -6,6 +6,11 @@ export default class Game {
         if (settings.length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
+        while (settings.shipsPerPlayer !== settings.shipLengths.length) {
+            settings.shipLengths.forEach(length => {
+                settings.shipLengths.push(length)
+            })
+        }
 
         this.players = []
         this.survivors = []
