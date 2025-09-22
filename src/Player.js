@@ -8,8 +8,13 @@ export default class Player {
         this.id = id // Player 1, 2...
         this.defeated = false
 
-        this.board = new Gameboard(8);
+        this.board = new Gameboard(gameSettings.boardLength);
         this.events = new EventEmitter()
+
+        this.allShipsPlaced = false
+        this.events.on('All ships placed', (event) => {
+            this.allShipsPlaced = true
+        })
 
         this.ships = []
         for (let length of gameSettings.shipLengths) {
@@ -24,14 +29,55 @@ export default class Player {
     }
 
     render() {
-        const render = document.createElement('div')
+        const board = document.createElement('div')
+        board.classList.add('board')
+
+        for (let i = 0; i < gameSettings.boardLength; i++) {
+            const row = document.createElement('div')
+
+            for (let j = 0; j < gameSettings.boardLength; j++) {
+                const square = document.createElement('div')
+
+                if (this.allShipsPlaced === true) {
+                    square.addEventListener('click', (event) => {
+                        this.attack(square)
+                    })
+                } else {
+                    square.addEventListener('dragover', (event) => {
+                        event.preventDefault()
+                    })
+                    square.addEventListener('drop', (event) => {
+                        event.preventDefault()
+
+                        const dropped = JSON.parse(event.dataTransfer.getData('text'))
+                        const length = dropped.length
+                        const vertical = dropped.vertical
+
+                        if (!vertical) {
+
+                        }
+                    })
+                }
+
+                row.append(square)
+            }
+            board.append(row)
+        }
     }
 
     place(array) {
         if (this.board.place(array) === true) { // if true, successful placement
-            ships.forEach((ship) => {
+            this.ships.forEach((ship) => {
                 if (ship.length === array.length) {
                     ship.pos = array
+
+                    for (let ship of this.ships) {
+                        if (ship.pos.length === 0) {
+                            return true
+                        }
+                    }
+                    this.events.emit('All ships placed')
+                    return true
                 }
             })
         } else {

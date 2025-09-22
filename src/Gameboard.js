@@ -3,11 +3,9 @@ import EventEmitter from 'node:events';
 export default class Gameboard {
     constructor(length) {
         this.length = length
-        this.allShipsDead = false
 
         this.board = []
         this.boardOffense = []
-        this.alive = []
 
         for (let i = 0; i < this.length ** 2; i++) {
             this.board.push(0)
@@ -19,7 +17,6 @@ export default class Gameboard {
 
     place(array) { // square is a decimal, 0 through board.length ** 2
         let board = this.board
-        let alive = this.alive
 
         let orientation
         for (let i = array.length - 1; i > 0; i--) {
@@ -63,41 +60,28 @@ export default class Gameboard {
 
         array.forEach((square) => {
             board[square] = 1 // fill empty squares with boat
-
-            alive.push(square)
         })
         return true
     }
 
     attack(square, player) {
-        if (player.board === this) { // If true, owner of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
+        if (player.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
             if (this.boardOffense[square] === 0) { // check validity of attack
                 this.boardOffense[square] = 1
+
                 return true
             } else if (this.boardOffense[square] === 1) {
-                this.boardOffense[square] = 2
+                this.boardOffense[square] = 2 // successful attack
+
                 return null
             } else {
                 return false
             }
-        } else {
+        } else { // parent of board is being attacked
             let board = this.board
-            let alive = this.alive
 
             if (board[square] === 1) {
                 board[square] = 2 // dead square
-
-                for (let i = 0; i < alive.length; i++) {
-                    if (alive[i] === square) {
-                        alive.splice(i, 1)
-                    }
-                }
-
-                if (alive.length === 0) { // check if all boats are dead
-                    this.allShipsDead = true
-                }
-
-                // this.events.emit('hit', { pos: square, allShipsDead: this.allShipsDead })
 
                 return true
             } else if (board[square] === 2 || board[square] === 3 /*3 is a previous miss*/) { // tried to attack previously-attacked square, try again w/o switching turns
@@ -105,7 +89,6 @@ export default class Gameboard {
             } else {
                 board[square] = 3 // missed attack
 
-                // this.events.emit('miss', { pos: square })
                 return false
             }
         }

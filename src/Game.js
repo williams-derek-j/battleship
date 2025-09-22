@@ -12,36 +12,44 @@ export default class Game {
         for (let i = 0; i < settings.players; i++) {
             const player = new Player(`Player${i}`, i, settings);
 
-            this.survivors.push(player.id)
-
             // player.events.on('Attack', this.sendAttempt)
             player.events.on('Hit', this.sendHit)
             player.events.on('Miss', this.sendMiss)
             player.events.on('Sunk', this.sendSink)
             player.events.on('Defeated', this.sendDefeat)
 
+            this.survivors.push(player)
             this.players.push(player)
         }
         this.events = new EventEmitter()
 
-        this.turn = 1
+        this._turn = 1
 
-        while (this.survivors > 1) {
-            this.play()
+        // while (this.survivors > 1) {
+        //     this.play()
+        //
+        //     this.turn += 1
+        // }
+    }
 
-            this.turn++
+    set turn(val) {
+        if (val <= this.survivors.length) {
+            this._turn = val
+        } else {
+            this._turn = 1
         }
     }
 
-    async play() {
-        for (let attacker of this.players) {
-            const data = await new Promise(resolve => {
-                attacker.events.on('Attack', (data) => {
-                    resolve(data)  // pass the event data back
-                })
-            })
+    get turn() {
+        return this._turn
+    }
 
-            this.sendAttempt(data)
+    play() {
+        while (this.survivors > 1) {
+            const render = this.survivors[this.turn].render()
+
+            this.turn += 1
+            this.play()
         }
     }
 
