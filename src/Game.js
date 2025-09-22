@@ -1,28 +1,74 @@
 import Player from './Player'
+import EventEmitter from "node:events";
 
 export default class Game {
-    constructor(gameSettings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
-        if (gameSettings.length !== 4) {
+    constructor(container, settings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
+        if (settings.length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
 
         this.players = []
-        for (let i = 0; i < gameSettings.players; i++) {
-            const player = new Player(`Player${i}`, i, gameSettings);
+        this.survivors = []
+        for (let i = 0; i < settings.players; i++) {
+            const player = new Player(`Player${i}`, i, settings);
 
-            player.events.on('Attack', this.sendAttempt)
-            player.events.on('Hit', this.sendAttack)
+            this.survivors.push(player.id)
+
+            // player.events.on('Attack', this.sendAttempt)
+            player.events.on('Hit', this.sendHit)
             player.events.on('Miss', this.sendMiss)
             player.events.on('Sunk', this.sendSink)
             player.events.on('Defeated', this.sendDefeat)
 
             this.players.push(player)
         }
+        this.events = new EventEmitter()
 
-        this.survivors = this.players.length
+        this.turn = 1
+
+        while (this.survivors > 1) {
+            this.play()
+
+            this.turn++
+        }
     }
 
-    play() {
+    async play() {
+        for (let attacker of this.players) {
+            const data = await new Promise(resolve => {
+                attacker.events.on('Attack', (data) => {
+                    resolve(data)  // pass the event data back
+                })
+            })
 
+            this.sendAttempt(data)
+        }
+    }
+
+    sendAttempt(data) {
+        this.players.forEach(player => {
+            if (player !== data.player) { // everyone who isn't the player sending the attempt
+                player.receive(data.square, data.player)
+            }
+        })
+    }
+
+    sendHit(data) {
+
+    }
+
+    sendDefeat(defeated) {
+        for (let i = 0; i < this.survivors.length; i++) {
+            if (this.survivors[i] === defeated.id) {
+                this.survivors.splice(i, 1)
+            }
+        }
+        if (this.survivors.length === 1) {
+            this.players.forEach(player => {
+                if (player.id === this.survivors[0]) {
+                    this.events.emit('Game Over', player)
+                }
+            })
+        }
     }
 }

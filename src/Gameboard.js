@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 
 export default class Gameboard {
-    constructor(length, gameSettings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6]}) {
+    constructor(length) {
         this.length = length
         this.allShipsDead = false
 
@@ -11,9 +11,10 @@ export default class Gameboard {
 
         for (let i = 0; i < this.length ** 2; i++) {
             this.board.push(0)
+            this.boardOffense.push(0)
         }
 
-        this.events = new EventEmitter()
+        // this.events = new EventEmitter()
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
@@ -70,9 +71,15 @@ export default class Gameboard {
 
     attack(square, player) {
         if (player.board === this) { // If true, owner of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
-            this.boardOffense.push(square)
-
-            return null
+            if (this.boardOffense[square] === 0) { // check validity of attack
+                this.boardOffense[square] = 1
+                return true
+            } else if (this.boardOffense[square] === 1) {
+                this.boardOffense[square] = 2
+                return null
+            } else {
+                return false
+            }
         } else {
             let board = this.board
             let alive = this.alive

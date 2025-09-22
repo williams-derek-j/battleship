@@ -17,6 +17,8 @@ export default class Ship {
 
         if (this._health === 0) {
             this.events.emit('Sunk', this)
+
+            this.events.removeAllListeners('Sunk')
         }
     }
 

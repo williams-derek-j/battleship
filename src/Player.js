@@ -3,7 +3,7 @@ import Gameboard from "./Gameboard";
 import Ship from './Ship';
 
 export default class Player {
-    constructor(name, id, gameSettings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6]}) {
+    constructor(name, id, gameSettings) {
         this.name = name;
         this.id = id // Player 1, 2...
         this.defeated = false
@@ -19,8 +19,12 @@ export default class Player {
 
             this.ships.push(ship)
         }
-        this.survivors = [...this.ships]
+        this.survivors = this.ships.length
         this.dead = []
+    }
+
+    render() {
+        const render = document.createElement('div')
     }
 
     place(array) {
@@ -50,19 +54,29 @@ export default class Player {
     }
 
     attack(square) {
-        this.board.attack(square, this) // keep track of your attacks
+        if (this.board.attack(square, this) === true) { // keep track of your attacks
+            this.events.emit('Attack', { square: square, player: this })
+        } else {
+            throw Error('Invalid square!')
+        }
+    }
 
-        this.events.emit('Attack', { player: id, square: square })
+    attackSuccess(square) {
+
     }
 
     scuttle(ship) {
-        this.survivors.splice(this.survivors.indexOf(ship), 1)
+        this.survivors -= 1
+
         this.dead.push(ship)
 
         this.events.emit('Sunk', ship)
 
         if (this.survivors.length === 0) {
+            this.defeated = true
+
             this.events.emit('Defeated', this)
+            this.events.removeAllListeners('Defeated')
         }
     }
 }
