@@ -1,11 +1,9 @@
 import EventEmitter from 'node:events';
 
 export default class Gameboard {
-    constructor(length, quantity = 8 /*quantity is total boats, half per player*/, boatMax = 6, boatMin = 3) {
+    constructor(length, gameSettings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6]}) {
         this.length = length
         this.allShipsDead = false
-
-        this.search = {}
 
         this.board = []
         this.boardOffense = []
@@ -20,18 +18,17 @@ export default class Gameboard {
 
     place(array) { // square is a decimal, 0 through board.length ** 2
         let board = this.board
-        let length = this.length
         let alive = this.alive
 
         let orientation
         for (let i = array.length - 1; i > 0; i--) {
-            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) / length !== 1) { // check if boat is disjointed, i.e., skips a square
+            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) / this.length !== 1) { // check if boat is disjointed, i.e., skips a square
 
                 return false
             }
             if (array[i] - array[i - 1] === 1) {
                 orientation = 'horizontal'
-            } else if ((array[i] - array[i - 1]) % length === 0) {
+            } else if ((array[i] - array[i - 1]) % this.length === 0) {
                 orientation = 'vertical'
             }
         }
@@ -50,7 +47,7 @@ export default class Gameboard {
         }
 
         if (orientation === 'horizontal') { // check to make sure horizontal boat doesn't wrap
-            let mod = length
+            let mod = this.length
 
             while (array[0] > mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
                 mod *= 2
@@ -66,7 +63,6 @@ export default class Gameboard {
         array.forEach((square) => {
             board[square] = 1 // fill empty squares with boat
 
-            this.search[`${square}`] = alive.length
             alive.push(square)
         })
         return true
@@ -76,7 +72,7 @@ export default class Gameboard {
         if (player.board === this) { // If true, owner of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
             this.boardOffense.push(square)
 
-            return true
+            return null
         } else {
             let board = this.board
             let alive = this.alive
@@ -84,14 +80,17 @@ export default class Gameboard {
             if (board[square] === 1) {
                 board[square] = 2 // dead square
 
-                const index = this.search[`${square}`] // remove square from surviving boats
-                alive.splice(index, 1)
+                for (let i = 0; i < alive.length; i++) {
+                    if (alive[i] === square) {
+                        alive.splice(i, 1)
+                    }
+                }
 
                 if (alive.length === 0) { // check if all boats are dead
                     this.allShipsDead = true
                 }
 
-                this.events.emit('hit', { pos: square, allShipsDead: this.allShipsDead })
+                // this.events.emit('hit', { pos: square, allShipsDead: this.allShipsDead })
 
                 return true
             } else if (board[square] === 2 || board[square] === 3 /*3 is a previous miss*/) { // tried to attack previously-attacked square, try again w/o switching turns
@@ -99,7 +98,7 @@ export default class Gameboard {
             } else {
                 board[square] = 3 // missed attack
 
-                this.events.emit('miss', { pos: square })
+                // this.events.emit('miss', { pos: square })
                 return false
             }
         }

@@ -114,7 +114,9 @@ test('Hit boat', () => {
     board.events.on('hit', listener)
 
     expect(board.place([9,17,25,33,41,49])).toBeTruthy()
+    expect(board.alive.length).toBe(6)
     expect(board.attack(9, player)).toBeTruthy() // Probably the board should take as little information as possible.
+    expect(board.alive.length).toBe(5)
 
     expect(listener).toHaveBeenCalled()
     expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9, allShipsDead: false })) // The listener represents either a player object or boat object that listeners for the board to emit hit events
