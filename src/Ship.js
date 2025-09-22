@@ -24,17 +24,23 @@ export default class Ship {
             const render = document.createElement("div")
             render.classList.add('ship')
             render.classList.add(`${this.length}`)
-            render.classList.add(`${this.vertical}`)
+            if (this.vertical) {
+                render.classList.add(`vertical`)
+            }
+            if (this.reversed) {
+                render.classList.add(`reversed`)
+            }
 
             if (this.pos.length === 0) {
                 render.addEventListener('dragstart', (event) => {
                     if (this.pos.length === 0) {
                         render.addEventListener('onkeydown', (event) => { // rotate ship while dragging
                             if (event.code === 'KeyR') {
-                                render.classList.toggle('true')
+                                render.classList.toggle('vertical')
                                 this.vertical = !this.vertical;
 
                                 if (this.vertical !== true) { // force rotation 90 degrees -- this gets called every other time R is pressed
+                                    render.classList.toggle('reversed') // order is v (-90), hr (-180), vr (-270), h (0)
                                     this.reversed = !this.reversed
                                 }
                             }
@@ -45,8 +51,14 @@ export default class Ship {
                 })
             }
             this._render = render
-            return render
         }
+    }
+
+    get render() {
+        if (this._render === null) {
+            this.render = undefined // create render
+        }
+        return this._render
     }
 
     set health(health) {

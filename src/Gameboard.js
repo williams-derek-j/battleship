@@ -12,7 +12,146 @@ export default class Gameboard {
             this.offense.push(0)
         }
 
+        this._renderDefense = null
+        this._renderOffense = null
+
+        this.gameStarted = false
+
         // this.events = new EventEmitter()
+    }
+
+    set renderDefense(callback) {
+        if (callback !== null) {
+            if (callback || callback === undefined) {
+                const board = document.createElement('div')
+                board.classList.add('board')
+                board.classList.add('defense')
+
+                for (let i = 0; i < this.length; i++) {
+                    const row = document.createElement('div')
+
+                    for (let j = 0; j < this.length; j++) {
+                        const index = ((board.length * this.length) + row.length)
+
+                        const square = document.createElement('div')
+                        square.classList.add('square')
+
+                        if (callback !== undefined) {
+                            square.addEventListener('dragover', (event) => {
+                                event.preventDefault()
+                            })
+                            square.addEventListener('drop', (event) => {
+                                event.preventDefault()
+
+                                const dropped = JSON.parse(event.dataTransfer.getData('text'))
+                                const length = dropped.length
+                                const vertical = dropped.vertical
+                                const reversed = dropped.reversed
+
+                                const array = []
+                                if (!vertical) {
+                                    if (!reversed) {
+                                        for (let i = 0; i < length; i++) {
+                                            if (!reversed) {
+                                                array.push(index + i)
+                                            }
+                                        }
+                                    } else {
+                                        for (let i = length - 1; i >= 0; i--) {
+                                            if (!reversed) {
+                                                array.push(index - i)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    if (!reversed) {
+                                        for (let i = 0; i < length; i++) {
+                                            array.push(index + (i * this.length))
+                                        }
+                                    } else {
+                                        for (let i = length - 1; i >= 0; i--) {
+                                            array.push(index - (i * this.length))
+                                        }
+                                    }
+                                }
+                                callback(array)
+                            })
+                        } else {
+                            if (this.defense[index] === 1) {
+                                square.classList.add('ship')
+                            } else if (this.defense[index] === 2) {
+                                square.classList.add('damage')
+                            } else if (this.defense[index] === 3) {
+                                square.classList.add('miss')
+                            }
+                        }
+                        row.append(square)
+                    }
+                    board.append(row)
+                }
+                this._renderDefense = board
+            } else if (typeof callback !== 'function') {
+                this._renderDefense = callback // callback is actually a DOM element
+            }
+        } else {
+            this._renderDefense = null
+        }
+    }
+
+    get renderDefense() {
+        // if (this._renderDefense === null) {
+        //     this.renderDefense = undefined
+        // }
+        return this._renderDefense
+    }
+
+    set renderOffense(callback) {
+        if (callback !== null) {
+            if (typeof callback !== 'function') {
+                this._renderOffense = callback // callback is actually a reference to a DOM element
+            } else {
+                const board = document.createElement('div')
+                board.classList.add('board')
+                board.classList.add('offense')
+
+                for (let i = 0; i < this.length; i++) {
+                    const row = document.createElement('div')
+
+                    for (let j = 0; j < this.length; j++) {
+                        const index = ((board.length * this.length) + row.length)
+
+                        const square = document.createElement('div')
+                        square.classList.add('square')
+                        square.classList.add('offense')
+
+                        if (this.offense[index] === 1) {
+                            square.classList.add('miss')
+                        } else if (this.offense[index] === 2) {
+                            if (square.classList.contains('miss')) {
+                                square.classList.remove('miss')
+                            }
+                            square.classList.add('hit')
+                        }
+
+                        square.addEventListener('click', (event) => {
+                            callback(index)
+                        })
+                        row.append(square)
+                    }
+                    board.append(row)
+                }
+                this._renderOffense = board
+            }
+        } else {
+            this._renderOffense = null
+        }
+    }
+
+    get renderOffense() {
+        // if (this._renderDefense === null) {
+        //     this.renderDefense = undefined
+        // }
+        return this._renderDefense
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
