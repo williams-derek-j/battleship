@@ -1,4 +1,5 @@
 import EventEmitter from './events';
+import sort from './sort'
 
 export default class Gameboard {
     constructor(length) {
@@ -30,10 +31,9 @@ export default class Gameboard {
                 for (let i = 0; i < this.length; i++) {
                     const row = document.createElement('div')
                     row.classList.add('row')
-                    console.log(row)
 
                     for (let j = 0; j < this.length; j++) {
-                        const index = ((board.children.length * this.length) + row.children.length)
+                        const index = ((board.children.length * this.length) + row.children.length) // gives 0 - 63 or 0 - whatever board length ** 2 is
 
                         const square = document.createElement('div')
                         square.classList.add('square')
@@ -50,10 +50,9 @@ export default class Gameboard {
                                 const length = dropped.length
                                 const vertical = dropped.vertical
                                 const reversed = dropped.reversed
-                                console.log(vertical, reversed)
                                 console.log('dropped', dropped)
 
-                                const array = []
+                                let array = []
                                 if (!vertical) {
                                     if (!reversed) {
                                         for (let i = 0; i < length; i++) {
@@ -74,6 +73,9 @@ export default class Gameboard {
                                             array.push(index - (i * this.length))
                                         }
                                     }
+                                }
+                                if (array[0] > array[1]) {
+                                    array = sort(array)
                                 }
                                 const result = callback(array)
                                 if(result === true) {
@@ -100,10 +102,10 @@ export default class Gameboard {
                                         }
                                     } else if (vertical === true) {
                                         let mod = this.length // find index of square in row
-                                        while (mod < array[0]) {
+                                        while (mod <= array[0]) {
                                             mod += this.length
                                         }
-                                        const index = this.length % (mod - array[0])
+                                        const index = this.length - (mod - array[0])
 
                                         if (reversed === false) {
                                             for (let i = 1; i < array.length; i++) {
@@ -241,12 +243,11 @@ export default class Gameboard {
         if (orientation === 'horizontal') { // check to make sure horizontal boat doesn't wrap
             let mod = this.length
 
-            while (array[0] > mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
+            while (array[0] >= mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
                 mod += this.length
             }
 
             for (let square of array) {
-                console.log(mod, square)
                 if (square >= mod) {
                     return false // horizontal boat wraps around from right to left
                 }

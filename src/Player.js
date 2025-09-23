@@ -30,12 +30,12 @@ export default class Player {
         this.dead = []
     }
 
-    set render(render) {
-        if (render !== undefined) {
-            this._render = render
+    set render(renderX) {
+        if (renderX !== undefined) {
+            this._render = renderX
         } else {
-            const render = document.createElement('div')
-            render.classList.add('player')
+            const renderX = document.createElement('div')
+            renderX.classList.add('player')
 
             if (this.allShipsPlaced === false) {
                 const shipsContainer = document.createElement('div')
@@ -60,7 +60,7 @@ export default class Player {
                         }
                     })
                 })
-                render.append(button)
+                renderX.append(button)
 
                 this.ships.forEach((ship) => {
                     if (ship.pos.length === 0) { // check to make sure ship hasn't bene placed yet
@@ -68,12 +68,13 @@ export default class Player {
                         shipsContainer.appendChild(ship.render)
                     }
                 })
-                render.appendChild(shipsContainer)
+
+                renderX.appendChild(shipsContainer)
             } else {
                 this.board.renderOffense = this.attack.bind(this)
 
                 let offense = this.board.renderOffense
-                render.append(offense)
+                renderX.append(offense)
             }
 
             let defense
@@ -88,9 +89,9 @@ export default class Player {
                 this.board.renderDefense = undefined
                 defense = this.board.renderDefense
             }
-            render.append(defense)
+            renderX.append(defense)
 
-            this._render = render
+            this._render = renderX
         }
     }
 
@@ -118,7 +119,6 @@ export default class Player {
                 }
             }
         } else {
-            console.log('vv')
             return false
         }
     }

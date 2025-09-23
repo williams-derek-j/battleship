@@ -6,7 +6,6 @@ export default class Game {
         if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
-        console.log('hey')
         while (settings.shipsPerPlayer !== settings.shipLengths.length) {
             settings.shipLengths.forEach(length => {
                 settings.shipLengths.push(length)
@@ -45,7 +44,7 @@ export default class Game {
     }
 
     play() {
-        console.log('play called')
+        console.log('play() called')
         if (this.survivors.length > 1) {
             const player = this.survivors[this.turn]
 
@@ -55,7 +54,7 @@ export default class Game {
             while (this.container.firstChild) {
                 this.container.removeChild(this.container.lastChild)
             }
-            console.log('player render', render)
+            console.log('play(); current player render:', render)
             this.container.appendChild(render)
 
             this.events.on('Attack', (event) => {

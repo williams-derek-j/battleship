@@ -17,31 +17,33 @@ export default class Ship {
         this._render = null
     }
 
-    set render(render) {
-        if (render !== undefined) {
-            this._render = render
+    set render(renderX) {
+        if (renderX !== undefined) {
+            this._render = renderX
         } else {
-            const render = document.createElement("div")
-            render.classList.add('ship')
-            render.classList.add(`${this.length}`)
+            const renderX = document.createElement("div")
+            renderX.innerText = ""
+            for (let i = 0; i < this.length; i++) {
+                renderX.innerText += '>'
+            }
+            renderX.classList.add('ship')
+            renderX.classList.add(`len${this.length}`)
             if (this.vertical) {
-                render.classList.add(`vertical`)
+                renderX.classList.add(`vertical`)
             }
             if (this.reversed) {
-                render.classList.add(`reversed`)
+                renderX.classList.add(`reversed`)
             }
 
             if (this.pos.length === 0) {
-                render.addEventListener('dragstart', (event) => {
-                    render.setAttribute('position', 'absolute')
-
+                renderX.addEventListener('dragstart', (event) => {
                     event.dataTransfer.clearData('text')
                     event.dataTransfer.setData('text', JSON.stringify({ length: this.length, vertical: this.vertical, reversed: this.reversed }))
 
                     // render.removeEventListener('dragstart', placeRender)
                 })
             }
-            this._render = render
+            this._render = renderX
         }
     }
 
