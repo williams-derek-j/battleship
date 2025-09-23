@@ -83,7 +83,7 @@ export default class Player {
     place(array) {
         console.log(array, this)
         if (this.board.place(array) === true) { // if true, successful placement
-            console.log('ww')
+            console.log('ww', array)
             for (let ship of this.ships) {
                 if (ship.length === array.length) { // this is a weakness, need a better way to identify ships -- would need ship drop event to transfer entire ship object
                     console.log('?')
@@ -100,6 +100,7 @@ export default class Player {
                 }
             }
         } else {
+            console.log('vv')
             return false
         }
     }

@@ -45,7 +45,7 @@ export default class Gameboard {
                                 event.preventDefault()
                             })
                             square.addEventListener('drop', (event) => {
-                                console.log('drop', index, this, square, square['data-index'])
+                                console.log('drop', index, this, square, square.getAttribute('data-index'))
                                 event.preventDefault()
 
                                 const dropped = JSON.parse(event.dataTransfer.getData('text'))
@@ -80,7 +80,9 @@ export default class Gameboard {
                                         }
                                     }
                                 }
-                                if(callback(array) === true) {
+                                const result = callback(array)
+                                console.log(result)
+                                if(result === true) {
                                     square.classList.add('occupied')
 
                                     let sibling = square
@@ -188,6 +190,7 @@ export default class Gameboard {
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
+        console.log('dp', array)
         const board = this.defense
 
         let orientation
@@ -220,10 +223,11 @@ export default class Gameboard {
             let mod = this.length
 
             while (array[0] > mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
-                mod *= 2
+                mod += this.length
             }
 
             for (let square of array) {
+                console.log(mod, square)
                 if (square >= mod) {
                     return false // horizontal boat wraps around from right to left
                 }
@@ -233,7 +237,6 @@ export default class Gameboard {
         array.forEach((square) => {
             board[square] = 1 // fill empty squares with boat
         })
-        console.log('n')
         return true
     }
 

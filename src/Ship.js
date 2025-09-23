@@ -32,23 +32,33 @@ export default class Ship {
             }
 
             if (this.pos.length === 0) {
-                render.addEventListener('dragstart', (event) => {
-                    console.log('dragstar', event)
-                    if (this.pos.length === 0) {
-                        render.addEventListener('onkeydown', (event) => { // rotate ship while dragging
-                            if (event.code === 'KeyR') {
-                                render.classList.toggle('vertical')
-                                this.vertical = !this.vertical;
+                render.addEventListener('onmousedown', (event) => {
+                    document.addEventListener('onkeydown', (event) => { // rotate ship while dragging
+                        console.log('keydown', event)
+                        if (event.code === 'KeyR') {
+                            render.classList.toggle('vertical')
+                            this.vertical = !this.vertical;
 
-                                if (this.vertical !== true) { // force rotation 90 degrees -- this gets called every other time R is pressed
-                                    render.classList.toggle('reversed') // order is v (-90), hr (-180), vr (-270), h (0)
-                                    this.reversed = !this.reversed
-                                }
+                            if (this.vertical !== true) { // force rotation 90 degrees -- this gets called every other time R is pressed
+                                render.classList.toggle('reversed') // order is v (-90), hr (-180), vr (-270), h (0)
+                                this.reversed = !this.reversed
                             }
-                        })
-                        event.dataTransfer.clearData('text')
-                        event.dataTransfer.setData('text', JSON.stringify({ length: this.length, vertical: this.vertical, reversed: this.reversed }))
-                    }
+                        }
+                    })
+                })
+                render.addEventListener('onmouseup', (event) => {
+                    document.removEventListener
+                })
+                render.addEventListener('dragstart', (event) => {
+                    render.setAttribute('position', 'absolute')
+
+                    console.log('dragstar', event, render)
+                    console.log('dragstar2', event, render)
+                    event.dataTransfer.clearData('text')
+                    event.dataTransfer.setData('text', JSON.stringify({ length: this.length, vertical: this.vertical, reversed: this.reversed }))
+                    console.log('b4',event.dataTransfer.getData('text'))
+
+                    // render.removeEventListener('dragstart', placeRender)
                 })
             }
             this._render = render
