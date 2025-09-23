@@ -74,6 +74,10 @@ body {
     background-color: maroon;
 }
 
+.square.miss {
+    background-color: blue;
+}
+
 .shipsContainer {
     display: flex;
     flex-direction: row;

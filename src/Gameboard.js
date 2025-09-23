@@ -264,7 +264,7 @@ export default class Gameboard {
     }
 
     attack(square, player) {
-        console.log('board attack', square, player)
+        console.log('board attack', square, 'attacker', player, 'this', this)
         if (player.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
             console.log('self attack')
             const board = this.offense

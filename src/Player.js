@@ -19,7 +19,7 @@ export default class Player {
         for (let length of gameSettings.shipLengths) {
             const ship = new Ship(length)
 
-            ship.events.on('Sunk', this.scuttle)
+            ship.events.on('Sunk', this.scuttle.bind(this))
 
             this.ships.push(ship)
         }
@@ -142,7 +142,9 @@ export default class Player {
     }
 
     attack(square) {
+        console.log('player attack', square, this)
         if (this.board.attack(square, this) === true) { // keep track of your attacks
+            console.log('emitting attack')
             this.eventsP.emit('Attack', { square: square, player: this })
         } else {
             throw Error('Invalid square!')
@@ -154,8 +156,10 @@ export default class Player {
     }
 
     scuttle(ship) {
+        console.log('scuttle', this, ship)
         this.survivors -= 1
 
+        ship.sunk = true
         this.dead.push(ship)
 
         this.events.emit('Sunk', ship)
