@@ -1,3 +1,5 @@
+console.log('hi')
+
 import "./style.css";
 import Game from './Game';
 

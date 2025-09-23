@@ -277,6 +277,8 @@ export default class Gameboard {
                 board[square] = 2 // successful attack
 
                 return null
+            } else if (board[square] >= 2) {
+                board[square] += 1 // successful repeat attack
             } else {
                 return false
             }

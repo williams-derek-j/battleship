@@ -53,23 +53,38 @@ export default class Game {
             console.log('player',player)
 
             if (player.allShipsPlaced === false) {
-                this.events.on('All ships placed', (data) => {
+                this.events.on('All ships placed', () => {
                     this.turn += 1
                     setTimeout(this.play.bind(this), 2000)
                 })
             } else {
                 this.events.on('Attack', (data) => {
                     console.log('h', data)
+
                     let length = player.board.length
                     let mod = length
-                    let i = 0
-                    while (mod <= data.square) {
+
+                    let row = 0 // index of row
+                    while (mod <= data.square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
                         mod += length
-                        i++
+                        row++
                     }
-                    player.board.renderOffense.children[i].children[data.square].classList.add('miss')
-                    this.sendAttempt(data)
+
+                    const column = length - (mod - data.square)
+
+                    const square = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
+
+                    const result = this.sendAttempt(data) // sendAttempt will change attacker and victim board data to be rendered later
+
+                    if (result !== false) { // render result immediately in attacker DOM
+                        square.classList.add('hit')
+                        square.classList.add(`q${result}`) // 1+ hits
+                    } else {
+                        square.classList.add('miss')
+                    }
+
                     this.turn += 1
+
                     setTimeout(this.play.bind(this), 2000)
                 })
             }
@@ -92,12 +107,21 @@ export default class Game {
         console.log('sendAttempt', data, 'pID', data.player.id, this)
         // this.turn += 1
 
+        let hits = 0
         this.players.forEach(player => {
             if (player.id !== data.player.id) { // everyone who isn't the player sending the attempt
                 console.log('player about to receive, pID', player.id, 'data.pID (attacker?)', data.player.id)
-                player.receive(data.square, data.player)
+                if (player.receive(data.square, data.player) === true) {
+                    data.player.attackSuccess(data.square)
+                    hits += 1
+                }
             }
         })
+        if (hits > 0) {
+            return hits
+        } else {
+            return false
+        }
         // this.play()
     }
 

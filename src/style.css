@@ -78,6 +78,26 @@ body {
     background-color: blue;
 }
 
+.square.hit {
+    background-color: #FFA1AD;
+}
+
+.square.hit.q2 {
+    background-color: #FF637E;
+}
+
+.square.hit.q3 {
+    background-color: #EC253F;
+}
+
+.square.hit.q4 {
+    background-color: #A50C36;
+}
+
+.square.hit.q5 {
+    background-color: #4D0218;
+}
+
 .shipsContainer {
     display: flex;
     flex-direction: row;

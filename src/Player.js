@@ -114,9 +114,9 @@ export default class Player {
                             return true // If any unplaced, return so code below isn't executed
                         }
                     }
-                    console.log('All ships placed event emitting')
+                    console.log("All ships placed event emitting")
                     this.allShipsPlaced = true
-                    this.eventsP.emit('All ships placed')
+                    this.eventsP.emit("All ships placed")
                     return true
                 }
             }
@@ -127,17 +127,19 @@ export default class Player {
 
     receive(square, attacker) {
         console.log('receive', square, 'attacker:', attacker, "this:", this)
+
         if (this.board.attack(square, attacker) === true) { // if true, successful attack
             for (let ship of this.ships) {
-                console.log(ship)
                 if (ship.pos.includes(square)) {
                     ship.health -= 1
                     break
                 }
             }
-            this.eventsP.emit('Hit received', square)
+            this.eventsP.emit("Hit received", square)
+            return true
         } else {
-            this.eventsP.emit('Miss received', square)
+            this.eventsP.emit("Miss received", square)
+            return false
         }
     }
 
@@ -147,12 +149,18 @@ export default class Player {
             console.log('emitting attack')
             this.eventsP.emit('Attack', { square: square, player: this })
         } else {
-            throw Error('Invalid square!')
+            throw Error("Invalid square!")
         }
     }
 
     attackSuccess(square) {
+        if (this.board.offense[square] === 1) {
+            this.board.offense[square] = 2
 
+            return true
+        } else {
+            throw Error("No previous attack found! Can't mark successful")
+        }
     }
 
     scuttle(ship) {
