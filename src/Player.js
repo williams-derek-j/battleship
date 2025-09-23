@@ -70,7 +70,7 @@ export default class Player {
 
                 renderX.appendChild(shipsContainer)
             } else { // all ships placed
-                this.board.renderOffense = this.attack.bind(this)
+                this.board.renderOffense = this.attack.bind(this)  /// render offense
 
                 let offense = this.board.renderOffense
                 console.log('append offense', offense)
@@ -81,7 +81,7 @@ export default class Player {
             if (this.allShipsPlaced === false) {
                 this.board.gameStarted = false
 
-                this.board.renderDefense = this.place.bind(this)
+                this.board.renderDefense = this.place.bind(this) /// render defense
                 defense = this.board.renderDefense
             } else {
                 this.board.gameStarted = true
@@ -115,6 +115,7 @@ export default class Player {
                         }
                     }
                     console.log("All ships placed event emitting")
+
                     this.allShipsPlaced = true
                     this.eventsP.emit("All ships placed")
                     return true
@@ -131,20 +132,22 @@ export default class Player {
         if (this.board.attack(square, attacker) === true) { // if true, successful attack
             for (let ship of this.ships) {
                 if (ship.pos.includes(square)) {
+                    this.events.emit("Hit received", { square: square, player: this }) // must send hit event before changing ship, which may send sunk event
+
                     ship.health -= 1
                     break
                 }
             }
-            this.eventsP.emit("Hit received", square)
             return true
         } else {
-            this.eventsP.emit("Miss received", square)
+            this.events.emit("Miss received", { square: square, player: this})
             return false
         }
     }
 
     attack(square) {
         console.log('player attack', square, this)
+
         if (this.board.attack(square, this) === true) { // keep track of your attacks
             console.log('emitting attack')
             this.eventsP.emit('Attack', { square: square, player: this })
@@ -153,29 +156,53 @@ export default class Player {
         }
     }
 
-    attackSuccess(square) {
-        if (this.board.offense[square] === 1) {
-            this.board.offense[square] = 2
+    markHit(square) {
+        console.log('markhit', square, this)
 
+        if (this.board.offense[square] !== -1) {
+            if (this.board.offense[square] >= 2) {
+                this.board.offense[square] += 1
+            } else {
+                this.board.offense[square] = 2
+            }
             return true
         } else {
-            throw Error("No previous attack found! Can't mark successful")
+            throw Error("Tried to mark hit on sunken square! Can't mark successful")
         }
+    }
+
+    markMiss(square) {
+        console.log('markmiss', square, this)
+
+        if (this.board.offense[square] >= 0) {
+            this.board.offense[square] = 1
+        } else {
+            throw Error('Tried to mark miss on an invalid square!')
+        }
+    }
+
+    markSink(ship) {
+        console.log('marsink', ship, this)
+
+        ship.pos.forEach((square) => {
+            this.board.offense[square] = -1
+        })
     }
 
     scuttle(ship) {
         console.log('scuttle', this, ship)
+
         this.survivors -= 1
 
         ship.sunk = true
         this.dead.push(ship)
 
-        this.events.emit('Sunk', ship)
+        this.events.emit('Sunk', { ship: ship, player: this })
 
         if (this.survivors.length === 0) {
             this.defeated = true
 
-            this.eventsP.emit('Defeated', this)
+            this.events.emit('Defeated', this)
             // this.eventsP.removeEventListener('Defeated', this)
         }
     }

@@ -34,12 +34,14 @@ export default class Gameboard {
 
                     for (let j = 0; j < this.length; j++) {
                         const index = ((board.children.length * this.length) + row.children.length) // gives 0 - 63 or 0 - whatever board length ** 2 is
+                        const value = this.defense[index] // value of square corresponding to render we are creating
 
                         const square = document.createElement('div')
                         square.classList.add('square')
+                        square.classList.add('defense')
                         square.setAttribute('data-index', index.toString())
 
-                        if (callback !== undefined) {
+                        if (callback !== undefined) { // initial render for ship placement
                             square.addEventListener('dragover', (event) => {
                                 event.preventDefault()
                             })
@@ -77,13 +79,14 @@ export default class Gameboard {
                                 if (array[0] > array[1]) {
                                     array = sort(array)
                                 }
+
                                 const result = callback(array)
                                 if(result === true) {
-                                    square.classList.add('occupied')
+                                    square.classList.add('occupied') // render selected square on DOM immediately
 
-                                    let current = square
-                                    if (vertical === false) {
-                                        if (reversed === false) {
+                                    let current = square // render rest of squares
+                                    if (vertical === false) { // horizontal
+                                        if (reversed === false) { // --->
                                             for (let i = 1; i < array.length; i++) {
                                                 let next = current.nextElementSibling
 
@@ -91,7 +94,7 @@ export default class Gameboard {
 
                                                 current = next
                                             }
-                                        } else if (reversed === true) {
+                                        } else if (reversed === true) { // <---
                                             for (let i = 1; i < array.length; i++) {
                                                 let previous = current.previousElementSibling
 
@@ -100,14 +103,14 @@ export default class Gameboard {
                                                 current = previous
                                             }
                                         }
-                                    } else if (vertical === true) {
+                                    } else if (vertical === true) { // vertical
                                         let mod = this.length // find index of square in row
                                         while (mod <= array[0]) {
                                             mod += this.length
                                         }
                                         const index = this.length - (mod - array[0])
 
-                                        if (reversed === false) {
+                                        if (reversed === false) { // V down, top to bottom
                                             for (let i = 1; i < array.length; i++) {
                                                 let next = current.parentElement.nextElementSibling.children[index]
 
@@ -115,7 +118,7 @@ export default class Gameboard {
 
                                                 current = next
                                             }
-                                        } else {
+                                        } else { // ^ up, bottom to top
                                             for (let i = 1; i < array.length; i++) {
                                                 let previous = current.parentElement.previousElementSibling.children[index]
 
@@ -129,13 +132,15 @@ export default class Gameboard {
                                     console.log('invalid placement')
                                 }
                             })
-                        } else {
-                            if (this.defense[index] === 1) {
+                        } else { // already playing, don't need to render ship placement
+                            if (value === 1) {
                                 square.classList.add('occupied')
-                            } else if (this.defense[index] === 2) {
-                                square.classList.add('damage')
-                            } else if (this.defense[index] === 3) {
+                            } else if (value === 2) {
+                                square.classList.add('hit')
+                            } else if (value === 3) {
                                 square.classList.add('miss')
+                            } else if (value === -1) {
+                                square.classList.add('sunk')
                             }
                         }
                         row.append(square)
@@ -176,24 +181,32 @@ export default class Gameboard {
 
                     for (let j = 0; j < this.length; j++) {
                         const index = ((board.children.length * this.length) + row.children.length)
+                        const value = this.offense[index]
 
                         const square = document.createElement('div')
                         square.classList.add('square')
                         square.classList.add('offense')
 
-                        if (this.offense[index] === 1) {
+                        if (value === 1) {
                             square.classList.add('miss')
-                        } else if (this.offense[index] === 2) {
+                        } else if (value >= 2) {
                             if (square.classList.contains('miss')) {
                                 square.classList.remove('miss')
                             }
                             square.classList.add('hit')
+                            square.classList.add(`q${value - 1}`)
+                        } else if (value === -1) {
+                            if (square.classList.contains('hit')) {
+                                square.classList.remove('hit')
+                            }
+                            square.classList.add('sunk')
                         }
 
-                        square.addEventListener('click', (event) => {
-                            console.log('cb',index)
-                            callback(index)
-                        })
+                        if (value === 0) {
+                            square.addEventListener('click', (event) => {
+                                callback(index)
+                            })
+                        }
                         row.append(square)
                     }
                     board.append(row)
@@ -263,23 +276,21 @@ export default class Gameboard {
         return true
     }
 
-    attack(square, player) {
-        console.log('board attack', square, 'attacker', player, 'this', this)
-        if (player.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
+    attack(square, attacker) {
+        console.log('board attack', square, 'attacker', attacker, 'this', this)
+
+        if (attacker.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
             console.log('self attack')
             const board = this.offense
 
             if (board[square] === 0) { // check validity of attack
-                board[square] = 1
+                // board[square] = 1 // 1 is a missed attack, set it for default --- update: don't do anything, let the miss event handle it
 
                 return true
-            } else if (board[square] === 1) {
-                board[square] = 2 // successful attack
-
-                return null
-            } else if (board[square] >= 2) {
-                board[square] += 1 // successful repeat attack
-            } else {
+            } /*else if (board[square] === 1) {
+                board[square] = 2 // mark successful hit
+                return true
+            }*/ else {
                 return false
             }
         } else { // parent of board is being attacked

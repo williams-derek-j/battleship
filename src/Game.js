@@ -19,9 +19,9 @@ export default class Game {
         for (let i = 1; i <= settings.players; i++) {
             const player = new Player(`Player${i}`, i, this.events, settings);
 
-            player.events.on('Hit', this.sendHit)
-            player.events.on('Miss', this.sendMiss)
-            player.events.on('Sunk', this.sendSink)
+            player.events.on('Hit received', this.sendHit.bind(this))
+            player.events.on('Miss received', this.sendMiss.bind(this))
+            player.events.on('Sunk', this.sendSink.bind(this))
             player.events.on('Defeated', this.sendDefeat)
 
             this.survivors.push(player)
@@ -59,8 +59,6 @@ export default class Game {
                 })
             } else {
                 this.events.on('Attack', (data) => {
-                    console.log('h', data)
-
                     let length = player.board.length
                     let mod = length
 
@@ -76,7 +74,7 @@ export default class Game {
 
                     const result = this.sendAttempt(data) // sendAttempt will change attacker and victim board data to be rendered later
 
-                    if (result !== false) { // render result immediately in attacker DOM
+                    if (result !== false && !square.classList.contains('sunk')) { // render result immediately in attacker DOM
                         square.classList.add('hit')
                         square.classList.add(`q${result}`) // 1+ hits
                     } else {
@@ -105,14 +103,16 @@ export default class Game {
 
     sendAttempt(data) {
         console.log('sendAttempt', data, 'pID', data.player.id, this)
-        // this.turn += 1
+
+        const attacker = data.player
 
         let hits = 0
-        this.players.forEach(player => {
-            if (player.id !== data.player.id) { // everyone who isn't the player sending the attempt
-                console.log('player about to receive, pID', player.id, 'data.pID (attacker?)', data.player.id)
-                if (player.receive(data.square, data.player) === true) {
-                    data.player.attackSuccess(data.square)
+        this.players.forEach(victim => {
+            if (victim !== attacker) { // everyone who isn't the player sending the attempt
+                console.log('player about to receive, pID', victim.id, ' data.pID (attacker?)', attacker.id)
+
+                if (victim.receive(data.square, data.player) === true) { // victim will send out a hit or miss event to change attacker backend
+                    // attacker.markHit(data.square)
                     hits += 1
                 }
             }
@@ -122,21 +122,36 @@ export default class Game {
         } else {
             return false
         }
-        // this.play()
     }
 
     sendHit(data) {
         console.log('sendHit', data)
 
+        this.players.forEach(player => {
+            if (player !== data.player) {
+                player.markHit(data.square)
+            }
+         })
     }
 
     sendMiss(data) {
         console.log('sendMiss', data)
 
+        this.players.forEach(player => {
+            if (player !== data.player) {
+                player.markMiss(data.square)
+            }
+        })
     }
 
     sendSink(data) {
         console.log('sendSink', data)
+
+        this.players.forEach(player => {
+            if (player !== data.player) {
+                player.markSink(data.ship)
+            }
+        })
     }
 
     sendDefeat(defeated) {

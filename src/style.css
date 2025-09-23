@@ -70,31 +70,39 @@ body {
     background-color: darkgoldenrod;
 }
 
-.square.damage {
+.square.defense.hit {
     background-color: maroon;
+}
+
+.square.defense.sunk {
+    background-color: #353434;
 }
 
 .square.miss {
     background-color: blue;
 }
 
-.square.hit {
+.square.offense.sunk {
+    background-color: #4D0218;
+}
+
+.square.offense.hit {
     background-color: #FFA1AD;
 }
 
-.square.hit.q2 {
+.square.offense.hit.q2 {
     background-color: #FF637E;
 }
 
-.square.hit.q3 {
+.square.offense.hit.q3 {
     background-color: #EC253F;
 }
 
-.square.hit.q4 {
+.square.offense.hit.q4 {
     background-color: #A50C36;
 }
 
-.square.hit.q5 {
+.square.offense.hit.q5 {
     background-color: #4D0218;
 }
 
