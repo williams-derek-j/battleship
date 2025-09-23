@@ -131,7 +131,7 @@ export default class Gameboard {
                             })
                         } else {
                             if (this.defense[index] === 1) {
-                                square.classList.add('ship')
+                                square.classList.add('occupied')
                             } else if (this.defense[index] === 2) {
                                 square.classList.add('damage')
                             } else if (this.defense[index] === 3) {
@@ -175,7 +175,7 @@ export default class Gameboard {
                     const row = document.createElement('div')
 
                     for (let j = 0; j < this.length; j++) {
-                        const index = ((board.length * this.length) + row.length)
+                        const index = ((board.children.length * this.length) + row.children.length)
 
                         const square = document.createElement('div')
                         square.classList.add('square')
@@ -191,6 +191,7 @@ export default class Gameboard {
                         }
 
                         square.addEventListener('click', (event) => {
+                            console.log('cb',index)
                             callback(index)
                         })
                         row.append(square)
@@ -208,7 +209,7 @@ export default class Gameboard {
         // if (this._renderDefense === null) {
         //     this.renderDefense = undefined
         // }
-        return this._renderDefense
+        return this._renderOffense
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
@@ -230,7 +231,9 @@ export default class Gameboard {
         let sum = 0 // check if any of squares occupied
         for (let square of array) {
             if (board[square] !== undefined) {
-                sum += board[square]
+                if (board[square] === 1) {
+                    sum += board[square]
+                }
 
                 if (sum > 0) { // found occupied square
                     return false
@@ -261,7 +264,9 @@ export default class Gameboard {
     }
 
     attack(square, player) {
+        console.log('board attack', square, player)
         if (player.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
+            console.log('self attack')
             const board = this.offense
 
             if (board[square] === 0) { // check validity of attack
@@ -276,6 +281,7 @@ export default class Gameboard {
                 return false
             }
         } else { // parent of board is being attacked
+            console.log('enemy attack')
             const board = this.defense
 
             if (board[square] === 1) {

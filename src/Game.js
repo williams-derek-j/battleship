@@ -44,32 +44,51 @@ export default class Game {
     }
 
     play() {
+        console.log('pl', this)
+        this.events.off('Attack')
+        this.events.off('All ships placed')
+
         console.log('play() called')
         if (this.survivors.length > 1) {
-            const player = this.survivors[this.turn]
+            const player = this.survivors[this.turn - 1]
+            console.log('pl, pl:',player, this.turn)
+
+            if (player.allShipsPlaced === false) {
+                this.events.on('All ships placed', this.play.bind(this))
+            } else {
+                console.log('success')
+                this.events.on('Attack', this.sendAttempt.bind(this) ) /*
+                (event) => {
+                    this.sendAttempt(data)
+                    this.turn += 1
+                    this.play()
+                })*/
+            }
 
             player.render = undefined // create render
             const render = player.render
 
             while (this.container.firstChild) {
+                console.log('clearing container')
                 this.container.removeChild(this.container.lastChild)
             }
+            this.container.textContent = `PLAYER ${player.id}`
             console.log('play(); current player render:', render)
             this.container.appendChild(render)
 
-            this.events.on('Attack', (event) => {
-                this.turn += 1
-                this.play()
-            })
         }
     }
 
     sendAttempt(data) {
+        console.log('sendAttempt', data, this)
+        this.turn += 1
+
         this.players.forEach(player => {
             if (player !== data.player) { // everyone who isn't the player sending the attempt
                 player.receive(data.square, data.player)
             }
         })
+        this.play()
     }
 
     sendHit(data) {

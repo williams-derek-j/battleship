@@ -4,7 +4,7 @@ export default class Ship {
     constructor(length) {
         this.length = length
 
-        this.pos = []
+        this._pos = []
 
         this._health = length
         this.sunk = false
@@ -15,6 +15,22 @@ export default class Ship {
         this.events = new EventEmitter()
 
         this._render = null
+    }
+
+    set pos(pos) {
+        this._pos = pos
+
+        const parent = this.render.parentNode
+        for (let child of parent.children) {
+            if (child === this.render) {
+                parent.removeChild(this.render)
+            }
+        }
+        this.render = null
+    }
+
+    get pos() {
+        return this._pos
     }
 
     set render(renderX) {

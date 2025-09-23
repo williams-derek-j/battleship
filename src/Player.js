@@ -14,9 +14,6 @@ export default class Player {
         this.eventsP = eventsP;
 
         this.allShipsPlaced = false
-        this.events.on('All ships placed', (event) => {
-            this.allShipsPlaced = true
-        })
 
         this.ships = []
         for (let length of gameSettings.shipLengths) {
@@ -31,6 +28,8 @@ export default class Player {
     }
 
     set render(renderX) {
+        console.log('render player', this)
+
         if (renderX !== undefined) {
             this._render = renderX
         } else {
@@ -70,10 +69,11 @@ export default class Player {
                 })
 
                 renderX.appendChild(shipsContainer)
-            } else {
+            } else { // all ships placed
                 this.board.renderOffense = this.attack.bind(this)
 
                 let offense = this.board.renderOffense
+                console.log('append offense', offense)
                 renderX.append(offense)
             }
 
@@ -114,7 +114,9 @@ export default class Player {
                             return true // If any unplaced, return so code below isn't executed
                         }
                     }
-                    this.events.emit('All ships placed')
+                    console.log('All ships placed event emitting')
+                    this.allShipsPlaced = true
+                    this.eventsP.emit('All ships placed')
                     return true
                 }
             }
@@ -124,9 +126,11 @@ export default class Player {
     }
 
     receive(square, attacker) {
+        console.log('receive', square, 'attacker:', attacker, "this:", this)
         if (this.board.attack(square, attacker) === true) { // if true, successful attack
             for (let ship of this.ships) {
-                if (ship.pos.contains(square)) {
+                console.log(ship)
+                if (ship.pos.includes(square)) {
                     ship.health -= 1
                     break
                 }
