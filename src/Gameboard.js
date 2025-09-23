@@ -21,7 +21,6 @@ export default class Gameboard {
     }
 
     set renderDefense(callback) {
-        console.log('rd', this)
         if (callback !== null) {
             if (callback || callback === undefined) {
                 const board = document.createElement('div')
@@ -45,28 +44,24 @@ export default class Gameboard {
                                 event.preventDefault()
                             })
                             square.addEventListener('drop', (event) => {
-                                console.log('drop', index, this, square, square.getAttribute('data-index'))
                                 event.preventDefault()
 
                                 const dropped = JSON.parse(event.dataTransfer.getData('text'))
                                 const length = dropped.length
-                                console.log('dropped length', length)
                                 const vertical = dropped.vertical
                                 const reversed = dropped.reversed
+                                console.log(vertical, reversed)
+                                console.log('dropped', dropped)
 
                                 const array = []
                                 if (!vertical) {
                                     if (!reversed) {
                                         for (let i = 0; i < length; i++) {
-                                            if (!reversed) {
-                                                array.push(index + i)
-                                            }
+                                            array.push(index + i)
                                         }
                                     } else {
                                         for (let i = length - 1; i >= 0; i--) {
-                                            if (!reversed) {
-                                                array.push(index - i)
-                                            }
+                                            array.push(index - i)
                                         }
                                     }
                                 } else {
@@ -81,27 +76,52 @@ export default class Gameboard {
                                     }
                                 }
                                 const result = callback(array)
-                                console.log(result)
                                 if(result === true) {
                                     square.classList.add('occupied')
 
-                                    let sibling = square
+                                    let current = square
                                     if (vertical === false) {
                                         if (reversed === false) {
                                             for (let i = 1; i < array.length; i++) {
-                                                console.log('y', sibling, sibling.nextElementSibling)
-                                                sibling.nextElementSibling.classList.add('occupied')
-                                                sibling = sibling.nextElementSibling
+                                                let next = current.nextElementSibling
+
+                                                next.classList.add('occupied')
+
+                                                current = next
                                             }
                                         } else if (reversed === true) {
                                             for (let i = 1; i < array.length; i++) {
-                                                console.log('y2', sibling, sibling.nextElementSibling)
-                                                sibling.previousElementSibling.classList.add('occupied')
-                                                sibling = sibling.previousElementSibling
+                                                let previous = current.previousElementSibling
+
+                                                previous.classList.add('occupied')
+
+                                                current = previous
                                             }
                                         }
                                     } else if (vertical === true) {
+                                        let mod = this.length // find index of square in row
+                                        while (mod < array[0]) {
+                                            mod += this.length
+                                        }
+                                        const index = this.length % (mod - array[0])
 
+                                        if (reversed === false) {
+                                            for (let i = 1; i < array.length; i++) {
+                                                let next = current.parentElement.nextElementSibling.children[index]
+
+                                                next.classList.add('occupied')
+
+                                                current = next
+                                            }
+                                        } else {
+                                            for (let i = 1; i < array.length; i++) {
+                                                let previous = current.parentElement.previousElementSibling.children[index]
+
+                                                previous.classList.add('occupied')
+
+                                                current = previous
+                                            }
+                                        }
                                     }
                                 } else {
                                     console.log('invalid placement')
@@ -190,7 +210,6 @@ export default class Gameboard {
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
-        console.log('dp', array)
         const board = this.defense
 
         let orientation

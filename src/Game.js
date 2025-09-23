@@ -20,7 +20,6 @@ export default class Game {
         for (let i = 0; i < settings.players; i++) {
             const player = new Player(`Player${i}`, i, this.events, settings);
 
-            // player.events.on('Attack', this.sendAttempt)
             player.events.on('Hit', this.sendHit)
             player.events.on('Miss', this.sendMiss)
             player.events.on('Sunk', this.sendSink)
@@ -31,12 +30,6 @@ export default class Game {
         }
 
         this._turn = 1
-
-        // while (this.survivors > 1) {
-        //     this.play()
-        //
-        //     this.turn += 1
-        // }
     }
 
     set turn(val) {
@@ -52,18 +45,17 @@ export default class Game {
     }
 
     play() {
-        console.log('hey2', this.survivors, this.container)
+        console.log('play called')
         if (this.survivors.length > 1) {
-            console.log('hey3')
             const player = this.survivors[this.turn]
 
             player.render = undefined // create render
             const render = player.render
 
-            // while (this.container.firstChild) {
-            //     this.container.removeChild(this.container.lastChild)
-            // }
-            console.log('render', render)
+            while (this.container.firstChild) {
+                this.container.removeChild(this.container.lastChild)
+            }
+            console.log('player render', render)
             this.container.appendChild(render)
 
             this.events.on('Attack', (event) => {

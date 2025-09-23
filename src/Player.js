@@ -41,6 +41,27 @@ export default class Player {
                 const shipsContainer = document.createElement('div')
                 shipsContainer.classList.add('shipsContainer')
 
+                const button = document.createElement('button')
+                button.classList.add('rotate')
+                button.innerText = 'Rotate'
+                button.addEventListener('click', () => {
+                    for (let shipRender of shipsContainer.children) {
+                        shipRender.classList.toggle('vertical')
+
+                        if (!shipRender.classList.contains('vertical')) {
+                            shipRender.classList.toggle('reversed')
+                        }
+                    }
+                    this.ships.forEach(ship => {
+                        ship.vertical = !ship.vertical
+
+                        if (ship.vertical !== true) {
+                            ship.reversed = !ship.reversed
+                        }
+                    })
+                })
+                render.append(button)
+
                 this.ships.forEach((ship) => {
                     if (ship.pos.length === 0) { // check to make sure ship hasn't bene placed yet
                         ship.render = undefined
@@ -83,15 +104,12 @@ export default class Player {
     place(array) {
         console.log(array, this)
         if (this.board.place(array) === true) { // if true, successful placement
-            console.log('ww', array)
             for (let ship of this.ships) {
                 if (ship.length === array.length) { // this is a weakness, need a better way to identify ships -- would need ship drop event to transfer entire ship object
-                    console.log('?')
                     ship.pos = array
 
                     for (let ship of this.ships) { // Check for any unplaced ships
                         if (ship.pos.length === 0) {
-                            console.log('ship', ship)
                             return true // If any unplaced, return so code below isn't executed
                         }
                     }
