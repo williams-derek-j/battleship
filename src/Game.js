@@ -22,7 +22,7 @@ export default class Game {
             player.events.on('Hit received', this.sendHit.bind(this))
             player.events.on('Miss received', this.sendMiss.bind(this))
             player.events.on('Sunk', this.sendSink.bind(this))
-            player.events.on('Defeated', this.sendDefeat)
+            player.events.on('Defeated', this.sendDefeat.bind(this))
 
             this.survivors.push(player)
             this.players.push(player)
@@ -94,10 +94,11 @@ export default class Game {
                 console.log('clearing container')
                 this.container.removeChild(this.container.lastChild)
             }
-            this.container.textContent = `PLAYER ${player.id}`
-            console.log('play(); current player render:', render)
-            this.container.appendChild(render)
 
+            this.container.textContent = `PLAYER ${player.id}`
+            this.container.appendChild(render)
+        } else {
+            return false // only 1 player
         }
     }
 
@@ -155,17 +156,29 @@ export default class Game {
     }
 
     sendDefeat(defeated) {
+        console.log('sendDefeat', defeated)
+
         for (let i = 0; i < this.survivors.length; i++) {
-            if (this.survivors[i] === defeated.id) {
+            if (this.survivors[i] === defeated) {
                 this.survivors.splice(i, 1)
             }
         }
         if (this.survivors.length === 1) {
             this.players.forEach(player => {
-                if (player.id === this.survivors[0]) {
-                    this.events.emit('Game Over', player)
+                if (player === this.survivors[0]) {
+                    this.gameOver(player)
                 }
             })
         }
+    }
+
+    gameOver(winner) {
+        setTimeout(() => {
+            while (this.container.firstChild) {
+            console.log('clearing container')
+            this.container.removeChild(this.container.lastChild)
+            }
+            this.container.innerText = `WINNER: Player ${winner.id}`
+        }, 5000)
     }
 }

@@ -190,7 +190,7 @@ export default class Player {
     }
 
     scuttle(ship) {
-        console.log('scuttle', this, ship)
+        console.log('scuttle', this, ship, this.survivors)
 
         this.survivors -= 1
 
@@ -199,7 +199,7 @@ export default class Player {
 
         this.events.emit('Sunk', { ship: ship, player: this })
 
-        if (this.survivors.length === 0) {
+        if (this.survivors === 0) {
             this.defeated = true
 
             this.events.emit('Defeated', this)
