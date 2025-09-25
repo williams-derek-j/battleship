@@ -17,7 +17,7 @@ export default class Game {
         this.players = []
         this.survivors = []
         for (let i = 1; i <= settings.players; i++) {
-            const player = new Player(`Player${i}`, i, this.events, settings);
+            const player = new Player(i, this.events, settings, `Player${i}`);
 
             player.events.on('Hit received', this.sendHit.bind(this))
             player.events.on('Miss received', this.sendMiss.bind(this))
@@ -173,12 +173,14 @@ export default class Game {
     }
 
     gameOver(winner) {
-        setTimeout(() => {
-            while (this.container.firstChild) {
+        while (this.container.firstChild) { // clear screen container
             console.log('clearing container')
             this.container.removeChild(this.container.lastChild)
-            }
-            this.container.innerText = `WINNER: Player ${winner.id}`
-        }, 5000)
+        }
+
+        winner.render = undefined // generate render
+
+        this.container.textContent = `WINNER: PLAYER ${winner.id}`
+        this.container.appendChild(winner.render)
     }
 }

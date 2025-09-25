@@ -3,7 +3,7 @@ import Gameboard from "./Gameboard";
 import Ship from './Ship';
 
 export default class Player {
-    constructor(name, id, eventsP, gameSettings) {
+    constructor(id, eventsP, gameSettings, name = `Player${id}`) {
         this.name = name;
         this.id = id // Player 1, 2...
         this.defeated = false
