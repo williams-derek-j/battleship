@@ -26,88 +26,150 @@ export default class Computer extends Player {
         const hits = [] // squares that have been attacked but not sunk
 
         for (let i = 0; i < boardLength ** 2; i++) {
-            if (this.board.offense[i] === 0) {
-                available.push(i)
+            if (this.board.offense[i] === 0) { // 1 is a miss, -1 is a sunken square
+                available.push(i) // find available targets
             } else if (this.board.offense[i] >= 2) {
-                hits.push(i)
+                hits.push(i) // find previous hits on unsunken shits
             }
         }
 
         if (hits.length > 0) {
-            const square = hits[randomInt(0, hits.length)]
+            let hit = hits[0]
 
-            let left = square - 1
-            let right = square + 1
-            let top = square - boardLength
-            let bottom = square + boardLength
+            if (hits.length > 1) {
+                const hitMap = {}
+
+                for (let square of hits) { // building adjacency list
+                    const adjacent = [] // putting them all into one array will mean that AI focuses on biggest contiguous clusters and not longest lines
+
+                    let left = square - 1
+                    let right = square + 1
+                    let top = square - boardLength
+                    let bottom = square + boardLength
+
+                    while (hits.includes(left)) {
+                        adjacent.push(left)
+
+                        left -= 1
+                    }
+                    while (hits.includes(right)) {
+                        adjacent.push(right)
+
+                        right +=  1
+                    }
+                    while (hits.includes(top)) {
+                        adjacent.push(top)
+
+                        top -= boardLength
+                    }
+                    while(hits.includes(bottom)) {
+                        adjacent.push(bottom)
+
+                        bottom += boardLength
+                    }
+
+                    hitMap[square] = adjacent
+                }
+
+                let current = {length: 0}
+                for (let hit in hitMap) {
+                    if (hitMap[hit].length > hitMap[current].length) {
+                        current = hit
+                    }
+                }
+                hit = current
+            }
+
+            let left = hit - 1
+            let right = hit + 1
+            let top = hit - boardLength
+            let bottom = hit + boardLength
+            const chains = []
+            let chain = []
 
             const targets = []
 
-            while (hits.includes(left)) { // find if there are multiple hits in a row, meaning most likely another ship square is aligned we ought to attack
-                left = left - 1
-
-                if (available.includes(left)) { // left of left
-                    targets.push(left - 1)
+            // now find longest chain from hit with length < longest surviving ship - 1, with next space being available
+            while (hits.includes(left)) {
+                if (available.includes(left - 1) || hits.includes(left - 1)) {
+                    chain.push(left)
                 }
+                left -=  1
             }
+            chains.push(chain)
+
+            chain = []
             while (hits.includes(right)) {
-                right = right + 1
-
-                if (available.includes(right)) { // right of right
-                    targets.push(right + 1)
+                if (available.includes(right + 1) || hits.includes(right + 1)) {
+                    chain.push(right)
                 }
+                right += 1
             }
+            chains.push(chain)
+
+            chain = []
             while (hits.includes(top)) {
-                top = top - boardLength
-
-                if (available.includes(top)) { // top of top
-                    targets.push(top - boardLength)
+                if (available.includes(top - boardLength) || hits.includes(top - boardLength)) {
+                    chain.push(top)
                 }
+                top -= boardLength
             }
-            while (hits.includes(bottom)) {
-                bottom = bottom + boardLength
+            chains.push(chain)
 
-                if (available.includes(bottom)) { // end of chain?
-                    targets.push(bottom)
+            chain = []
+            while (hits.includes(bottom)) {
+                if (available.includes(bottom + boardLength) || hits.includes(bottom + boardLength)) {
+                    chain.push(bottom)
+                }
+                bottom += boardLength
+            }
+            chains.push(chain)
+
+            let longest = chains[0]
+            let index = 0 // 0,1,2,3 = l,r,t,p
+            for (let i = 0; i < chains.length; i++) {
+                if (chains[i].length > longest.length) {
+                    longest = chains[i]
+                    index = i
                 }
             }
 
             if (targets.length === 0) { // hit square was isolated, i.e., first hit on a ship
                 while (available.includes(left)) { // how much free space to left?
-                    left = left - 1
+                    left -= 1
 
                     if (!available.includes(left)) { // found end of free space
-                        if (square - left <= shipMax) { // amount of space can fit largest ship?
+                        if (square - left >= shipMin) { // amount of space can fit smallest ship?
                             targets.push(square) // if so, square is valid target
                         }
                     }
                 }
                 if (targets.length === 0) {
                     while (available.includes(right)) {
-                        right = right + 1
+                        right += 1
 
                         if (!available.includes(right)) {
-                            if (right - square <= shipMax) {
+                            if (right - square >= shipMin) {
                                 targets.push(square)
                             }
                         }
                     }
                     if (targets.length === 0) {
                         while (available.includes(top)) {
-                            top = top - boardLength
+                            top -= boardLength
 
                             if (!available.includes(top)) { //
-                                if ((square - top / boardLength) <= shipMax) {
+                                if ((square - top / boardLength) >= shipMin) {
                                     targets.push(square)
                                 }
                             }
                         }
                         if (targets.length === 0) {
                             if (available.includes(bottom)) {
-                                bottom = bottom + boardLength
+                                bottom += boardLength
 
                                 if (!available.includes(bottom)) {
-                                    if ((bottom - square) / boardLength <= shipMax) {
+                                    if ((bottom - square) / boardLength >= shipMin) {
                                         targets.push(square)
                                     }
                                 }
@@ -116,13 +178,12 @@ export default class Computer extends Player {
                     }
                 }
             }
+            const target = targets[randomInt(0, targets.length)]
+
+            this.attack(target)
         } else {
             // logic to find most isolated square
         }
-
-        const target = targets[randomInt(0, targets.length)]
-
-        this.attack(target)
     }
 
     placeShips() { // generate a random placement for ships
