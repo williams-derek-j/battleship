@@ -7,7 +7,7 @@ export default class Computer extends Player {
         this.name = null
     }
 
-    generateAttack() {
+    generateAttack() { // I should generate an adjacency list of a map of available squares. If no previous hits are found, target the square w/ most adjacents, i.e., most isolated square farthest away from nearest sink
         function randomInt(min, max) {
             return Math.floor(Math.random() * (max - min) ) + min;
         }
@@ -19,10 +19,11 @@ export default class Computer extends Player {
                 alive.push(ship)
             }
         }
+        const shipMin = alive[0].length
         const shipMax = alive[alive.length - 1].length
 
         const available = [] // available targets, i.e., never been attacked before
-        const hits = [] // best targets, i.e., squares that have been attacked but not sunk
+        const hits = [] // squares that have been attacked but not sunk
 
         for (let i = 0; i < boardLength ** 2; i++) {
             if (this.board.offense[i] === 0) {
@@ -33,74 +34,95 @@ export default class Computer extends Player {
         }
 
         if (hits.length > 0) {
-            let index = randomInt(0, hits.length) // random index
-
-            const square = hits[index]
+            const square = hits[randomInt(0, hits.length)]
 
             let left = square - 1
             let right = square + 1
             let top = square - boardLength
             let bottom = square + boardLength
 
-            const best = []
+            const targets = []
 
-            while (hits.includes(left)) { // find if there are multiple hits in a row, meaning most likely another ship square is aligned
+            while (hits.includes(left)) { // find if there are multiple hits in a row, meaning most likely another ship square is aligned we ought to attack
                 left = left - 1
 
                 if (available.includes(left)) { // left of left
-                    if ((square - left) + 1 < shipMax) {
-                        best.push(left - 1)
-                    }
+                    targets.push(left - 1)
                 }
             }
             while (hits.includes(right)) {
                 right = right + 1
 
                 if (available.includes(right)) { // right of right
-                    if ((right - square) + 1 < shipMax) {
-                        best.push(right + 1)
-                    }
+                    targets.push(right + 1)
                 }
             }
             while (hits.includes(top)) {
                 top = top - boardLength
 
                 if (available.includes(top)) { // top of top
-                    if (((square - top) / boardLength) + 1 < shipMax) {
-                        best.push(top - boardLength)
-                    }
+                    targets.push(top - boardLength)
                 }
             }
             while (hits.includes(bottom)) {
                 bottom = bottom + boardLength
 
                 if (available.includes(bottom)) { // end of chain?
-                    if (((bottom - square) / boardLength) + 1 <= shipMax) { // chain longer than max possible ship?
-                        best.push(bottom)
+                    targets.push(bottom)
+                }
+            }
+
+            if (targets.length === 0) { // hit square was isolated, i.e., first hit on a ship
+                while (available.includes(left)) { // how much free space to left?
+                    left = left - 1
+
+                    if (!available.includes(left)) { // found end of free space
+                        if (square - left <= shipMax) { // amount of space can fit largest ship?
+                            targets.push(square) // if so, square is valid target
+                        }
+                    }
+                }
+                if (targets.length === 0) {
+                    while (available.includes(right)) {
+                        right = right + 1
+
+                        if (!available.includes(right)) {
+                            if (right - square <= shipMax) {
+                                targets.push(square)
+                            }
+                        }
+                    }
+                    if (targets.length === 0) {
+                        while (available.includes(top)) {
+                            top = top - boardLength
+
+                            if (!available.includes(top)) { //
+                                if ((square - top / boardLength) <= shipMax) {
+                                    targets.push(square)
+                                }
+                            }
+                        }
+                        if (targets.length === 0) {
+                            if (available.includes(bottom)) {
+                                bottom = bottom + boardLength
+
+                                if (!available.includes(bottom)) {
+                                    if ((bottom - square) / boardLength <= shipMax) {
+                                        targets.push(square)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
-
-            if (best.length === 0) { // hit square was isolated, i.e., first hit on a ship
-                if (available.includes(left)) {
-                    best.push(left)
-                }
-                if (available.includes(right)) {
-                    best.push(right)
-                }
-                if (available.includes(top)) {
-                    best.push(top)
-                }
-                if (available.includes(bottom)) {
-                    best.push(bottom)
-                }
-            }
-
-            index = randomInt(0, best.length) // random index
-            const target = best[index]
-
-            this.attack(target)
+        } else {
+            // logic to find most isolated square
         }
+
+        const target = targets[randomInt(0, targets.length)]
+
+        this.attack(target)
     }
 
     placeShips() { // generate a random placement for ships
