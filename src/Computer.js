@@ -20,7 +20,6 @@ export default class Computer extends Player {
             }
         }
         const shipMax = alive[alive.length - 1].length
-        const shipMin = alive[0].length
 
         const available = [] // available targets, i.e., never been attacked before
         const hits = [] // best targets, i.e., squares that have been attacked but not sunk
