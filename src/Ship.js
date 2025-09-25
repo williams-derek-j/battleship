@@ -20,13 +20,15 @@ export default class Ship {
     set pos(pos) {
         this._pos = pos
 
-        const parent = this.render.parentNode
-        for (let child of parent.children) {
-            if (child === this.render) {
-                parent.removeChild(this.render)
+        if (this.render !== null) { // computer can set pos too, but its board & ships won't ever be rendered
+            const parent = this.render.parentNode
+            for (let child of parent.children) {
+                if (child === this.render) {
+                    parent.removeChild(this.render)
+                }
             }
+            this.render = null
         }
-        this.render = null
     }
 
     get pos() {

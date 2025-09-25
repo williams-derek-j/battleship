@@ -106,7 +106,7 @@ export default class Player {
         console.log(array, this)
         if (this.board.place(array) === true) { // if true, successful placement
             for (let ship of this.ships) {
-                if (ship.length === array.length) { // this is a weakness, need a better way to identify ships -- would need ship drop event to transfer entire ship object
+                if (ship.length === array.length) { // this is a weakness, can't have multiple ships of same length -- need a better way to identify ships, but would need ship drop event to transfer entire ship object
                     ship.pos = array
 
                     for (let ship of this.ships) { // Check for any unplaced ships
@@ -175,7 +175,7 @@ export default class Player {
         console.log('markmiss', square, this)
 
         if (this.board.offense[square] >= 0) {
-            this.board.offense[square] = 1
+            this.board.offense[square] = 1 // 1 is a miss, 2+ is a hit, -1 is a sunken square
         } else {
             throw Error('Tried to mark miss on an invalid square!')
         }
