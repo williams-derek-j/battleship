@@ -24,6 +24,7 @@ export default class Computer extends Player {
 
         const available = [] // available targets, i.e., never been attacked before
         const hits = [] // squares that have been attacked but not sunk
+        const targets = []
 
         for (let i = 0; i < boardLength ** 2; i++) {
             if (this.board.offense[i] === 0) { // 1 is a miss, -1 is a sunken square
@@ -39,150 +40,213 @@ export default class Computer extends Player {
             if (hits.length > 1) {
                 const hitMap = {}
 
-                for (let square of hits) { // building adjacency list
-                    const adjacent = [] // putting them all into one array will mean that AI focuses on biggest contiguous clusters and not longest lines
+                for (let square of hits) { // building adjacency list of contiguous hits
+                    const adjacents = []
 
                     let left = square - 1
                     let right = square + 1
                     let top = square - boardLength
                     let bottom = square + boardLength
 
+                    let adjacent = [] // adjacents array is grouped into subarrays: left, right, top, bottom
                     while (hits.includes(left)) {
                         adjacent.push(left)
 
                         left -= 1
                     }
+                    adjacents.push(adjacent)
+
+                    adjacent = []
                     while (hits.includes(right)) {
                         adjacent.push(right)
 
                         right +=  1
                     }
+                    adjacents.push(adjacent)
+
+                    adjacent = []
                     while (hits.includes(top)) {
                         adjacent.push(top)
 
                         top -= boardLength
                     }
+                    adjacents.push(adjacent)
+
+                    adjacent = []
                     while(hits.includes(bottom)) {
                         adjacent.push(bottom)
 
                         bottom += boardLength
                     }
+                    adjacents.push(adjacent)
 
-                    hitMap[square] = adjacent
+                    hitMap[square] = adjacents
                 }
 
-                let current = {length: 0}
+                let current = Object.keys(hitMap)[0]
                 for (let hit in hitMap) {
-                    if (hitMap[hit].length > hitMap[current].length) {
+                    if (hitMap[hit].reduce((total, current) => { return total + current.length }, 0) > hitMap[current].reduce((total, current) => { return total + current.length }, 0)) {
                         current = hit
                     }
                 }
                 hit = current
-            }
 
-            let left = hit - 1
-            let right = hit + 1
-            let top = hit - boardLength
-            let bottom = hit + boardLength
-            const chains = []
-            let chain = []
+                const horizontal = [...hitMap[hit][0], hit, ...hitMap[hit][1]] // left, hit, right
+                const vertical = [...hitMap[hit][2], hit, ...hitMap[hit][3]] // top, hit, bottom
 
-            const targets = []
+                if (horizontal.length >= vertical.length) {
+                    let left = horizontal[0]
+                    let adjL = left - 1
+                    let right = horizontal[horizontal.length - 1]
+                    let adjR = right + 1
 
-            // now find longest chain from hit with length < longest surviving ship - 1, with next space being available
-            while (hits.includes(left)) {
-                if (available.includes(left - 1) || hits.includes(left - 1)) {
-                    chain.push(left)
-                }
-                left -=  1
-            }
-            chains.push(chain)
+                    if (available.includes(adjL)) {
+                        if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
+                            targets.push(adjL)
+                        }
+                    } else { // prefer left, could rewrite to randomly pick left or right
+                        if (available.includes(adjR)) {
+                            if ((adjR - left) + 1 <= shipMax) {
+                                targets.push(adjR)
+                            }
+                        }
+                    }
+                } else if (targets.length === 0) { // horizontal might have been longer but had no available targets
+                    let top = vertical[0]
+                    let adjT = top - boardLength
+                    let bottom =  vertical[vertical.length - 1]
+                    let adjB = bottom + boardLength
 
-            chain = []
-            while (hits.includes(right)) {
-                if (available.includes(right + 1) || hits.includes(right + 1)) {
-                    chain.push(right)
-                }
-                right += 1
-            }
-            chains.push(chain)
-
-            chain = []
-            while (hits.includes(top)) {
-                if (available.includes(top - boardLength) || hits.includes(top - boardLength)) {
-                    chain.push(top)
-                }
-                top -= boardLength
-            }
-            chains.push(chain)
-
-            chain = []
-            while (hits.includes(bottom)) {
-                if (available.includes(bottom + boardLength) || hits.includes(bottom + boardLength)) {
-                    chain.push(bottom)
-                }
-                bottom += boardLength
-            }
-            chains.push(chain)
-
-            let longest = chains[0]
-            let index = 0 // 0,1,2,3 = l,r,t,p
-            for (let i = 0; i < chains.length; i++) {
-                if (chains[i].length > longest.length) {
-                    longest = chains[i]
-                    index = i
+                    if (available.includes(adjT)) {
+                        if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
+                            targets.push(adjT)
+                        }
+                    } else { // prefer top
+                        if (available.includes(adjB)) {
+                            if (((adjB - top) / boardLength) + 1 <= shipMax) {
+                                targets.push(adjB)
+                            }
+                        }
+                    }
                 }
             }
 
-            if (targets.length === 0) { // hit square was isolated, i.e., first hit on a ship
+           if (targets.length === 0) { // hit square was isolated
+                let left = hit - 1
+                let right = hit + 1
+                let top = hit - boardLength
+                let bottom = hit + boardLength
+
                 while (available.includes(left)) { // how much free space to left?
                     left -= 1
 
-                    if (!available.includes(left)) { // found end of free space
-                        if (square - left >= shipMin) { // amount of space can fit smallest ship?
-                            targets.push(square) // if so, square is valid target
-                        }
-                    }
-                }
-                if (targets.length === 0) {
-                    while (available.includes(right)) {
-                        right += 1
-
-                        if (!available.includes(right)) {
-                            if (right - square >= shipMin) {
-                                targets.push(square)
+                    if (!available.includes(left)) { // found end of free space on left
+                        if (!available.includes(right)) { // found end of free space on right -- there was none
+                            if ((right - left) - 1 >= shipMin) {
+                                targets.push(hit - 1) // no free space on right but enough on left to fit smallest ship, therefore 1 square left of hit is valid target
                             }
-                        }
-                    }
-                    if (targets.length === 0) {
-                        while (available.includes(top)) {
-                            top -= boardLength
+                        } else {
+                            while (available.includes(right)) { // find free space on right
+                                right += 1
 
-                            if (!available.includes(top)) { //
-                                if ((square - top / boardLength) >= shipMin) {
-                                    targets.push(square)
-                                }
-                            }
-                        }
-                        if (targets.length === 0) {
-                            if (available.includes(bottom)) {
-                                bottom += boardLength
-
-                                if (!available.includes(bottom)) {
-                                    if ((bottom - square) / boardLength >= shipMin) {
-                                        targets.push(square)
+                                if (!available.includes(right)) { // found end of free space on both sides
+                                    if ((right - left) - 1 >= shipMin) { // amount of space can fit smallest ship? -- right and left are unavailable spaces, so don't + 1,  actually - 1
+                                        targets.push(hit - 1) // if so, square is valid target
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-            const target = targets[randomInt(0, targets.length)]
+                if (targets.length === 0) { // prefer left, then right -- can only get here if there was no valid target to left
+                    left = hit - 1 // reset left
+
+                    while (available.includes(right)) { // how much free space to right?
+                        right += 1
+
+                        if (!available.includes(right)) { // found end of free space on right
+                            if (!available.includes(left)) { // found end of free space on left -- there was none
+                                if ((right - left) - 1 >= shipMin) {
+                                    targets.push(hit + 1) // no free space on right but enough on left to fit smallest ship, therefore 1 square right of hit is valid target
+                                }
+                            } else {
+                                while (available.includes(left)) { // find free space on left
+                                    left -= 1
+
+                                    if (!available.includes(left)) { // found end of free space on both sides
+                                        if ((right - left) - 1 >= shipMin) { // amount of space can fit smallest ship? -- right and left are unavailable spaces, so don't + 1,  actually - 1
+                                            targets.push(hit + 1) // if so, square is valid target
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (targets.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
+                        while (available.includes(top)) {
+                            top -= boardLength
+
+                            if (!available.includes(top)) { // found end of free space on top
+                                if (!available.includes(bottom)) { // found end of free space on bottom -- there was none
+                                    if ((bottom - top) - 1 >= shipMin) {
+                                        targets.push(hit - boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square above hit is valid target
+                                    }
+                                } else {
+                                    while (available.includes(bottom)) { // find free space on bottom
+                                        bottom += boardLength
+
+                                        if (!available.includes(bottom)) { // found end of free space on both sides
+                                            if ((bottom - top) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1,  actually - 1
+                                                targets.push(hit -  boardLength) // if so, square is valid target
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (targets.length === 0) { // prefer left, then right, then top, finally bottom if none else
+                            top = hit - boardLength // reset top
+
+                            if (available.includes(bottom)) {
+                                bottom += boardLength
+
+                                if (!available.includes(bottom)) { // found end of free space on bottom
+                                    if (!available.includes(top)) { // found end of free space on top -- there was none
+                                        if ((bottom - top) - 1 >= shipMin) {
+                                            targets.push(hit + boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square below hit is valid target
+                                        }
+                                    } else {
+                                        while (available.includes(top)) { // find free space on top
+                                            top -= boardLength
+
+                                            if (!available.includes(top)) { // found end of free space on both sides
+                                                if ((bottom - top) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1, actually - 1
+                                                    targets.push(hit +  boardLength) // if so, square is valid target
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (targets.length === 0 || targets.length >= 2) {
+                    throw Error('isolated hit square somehow had no valid adjacent targets or had more than 1 assigned, something is wrong w/ logic')
+                } else { // isolated hit square had valid targets adjacent
+                    this.attack(targets[0])
+                }
+           } else if (targets.length === 1) { // chain of hits had valid targets adjacent
+                this.attack(targets[0])
+           } else {
+               throw Error('chain of hits somehow had more than 1 valid adjacent target assigned, something is wrong w/ logic')
+           }
+        } else { // no hits, pick random square or most isolated square (exploitable if not unpredictably switching between most-isolated and true random targets)
+            // write logic to find most isolated square using adjacency list, target being the node w/ most free adjacents
+
+            const target = available[randomInt(0, available.length)]
 
             this.attack(target)
-        } else {
-            // logic to find most isolated square
         }
     }
 
