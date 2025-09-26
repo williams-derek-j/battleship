@@ -308,7 +308,7 @@ test('Attack fake line', () => {
     comp.board.offense[12] = 2
     comp.board.offense[13] = 2
     comp.board.offense[14] = 1
-    // [   _,_,_,X,X,X,_,_,
+    // [   _,_,_,V,X,X,_,_,
     //     _,_,M,H,H,H,M,_,
     //     _,_,_,X,X,X,_,_,
     //     _,_,_,_,_,_,_,_,
@@ -324,6 +324,7 @@ test('Attack fake line', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([3,4,5,19,20,21]).toContain(listener.mock.calls[0][0])
+    expect([3]).toContain(listener.mock.calls[0][0])
 })
 
 test('Attack fake line cont', () => {
