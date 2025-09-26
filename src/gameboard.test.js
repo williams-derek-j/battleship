@@ -89,7 +89,6 @@ test('Place invalid duplicate vertical boat single overlap', () => {
 })
 
 test('Hit boat', () => {
-    const player = new Player() // dummy player will be different from implicit owner of board below
     const board = new Gameboard(8)
 
     // const listener = jest.fn()
@@ -104,7 +103,6 @@ test('Hit boat', () => {
 })
 
 test('Miss attack', () => {
-    const player = new Player()
     const board = new Gameboard(8)
 
     // const listener = jest.fn()

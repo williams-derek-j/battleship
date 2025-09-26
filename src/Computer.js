@@ -21,7 +21,7 @@ export default class Computer extends Player {
         const shipMax = alive[alive.length - 1].length
 
         const available = [] // available targets, i.e., never been attacked before
-        const hits = [] // squares that have been attacked but not sunk
+        let hits = [] // squares that have been attacked but not sunk
         const targets = []
 
         for (let i = 0; i < boardLength ** 2; i++) {
@@ -94,53 +94,78 @@ export default class Computer extends Player {
                 }
                 hit = Number(current)
 
-                const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
-                const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
+                while (targets.length === 0) {
+                    const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
+                    const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
+                    console.log(horizontal,vertical)
 
-                if (horizontal.length >= vertical.length) {
-                    let left = horizontal[0]
+                    if (horizontal.length >= vertical.length) {
+                        let left = horizontal[0]
 
-                    let mod = boardLength
-                    while (mod <= left) {
-                        mod += boardLength
-                    }
-                    let adjL = left - 1 > mod - boardLength ? left - 1 : null // ternary check prevents wrapping
-
-                    let right = horizontal[horizontal.length - 1]
-                    let adjR = right + 1 < mod ? right + 1 : null
-
-                    if (available.includes(adjL)) {
-                        if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
-                            targets.push(adjL)
+                        let mod = boardLength
+                        while (mod <= left) {
+                            mod += boardLength
                         }
-                    } else { // prefer left, could rewrite to randomly pick left or right
-                        if (available.includes(adjR)) {
-                            if ((adjR - left) + 1 <= shipMax) {
-                                targets.push(adjR)
+                        let adjL = left - 1 > mod - boardLength ? left - 1 : null // ternary check prevents wrapping
+
+                        let right = horizontal[horizontal.length - 1]
+                        let adjR = right + 1 < mod ? right + 1 : null
+
+                        if (available.includes(adjL)) {
+                            if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
+                                targets.push(adjL)
+                            }
+                        } else { // prefer left, could rewrite to randomly pick left or right
+                            if (available.includes(adjR)) {
+                                if ((adjR - left) + 1 <= shipMax) {
+                                    targets.push(adjR)
+                                }
                             }
                         }
                     }
-                } else if (targets.length === 0) { // horizontal might have been longer but had no available targets
-                    let top = vertical[0]
-                    let adjT = top - boardLength
-                    let bottom =  vertical[vertical.length - 1]
-                    let adjB = bottom + boardLength
+                    if (targets.length === 0) { // horizontal might have been longer but had no available targets
+                        let top = vertical[0]
+                        let adjT = top - boardLength
+                        let bottom =  vertical[vertical.length - 1]
+                        let adjB = bottom + boardLength
 
-                    if (available.includes(adjT)) {
-                        if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
-                            targets.push(adjT)
-                        }
-                    } else { // prefer top
-                        if (available.includes(adjB)) {
-                            if (((adjB - top) / boardLength) + 1 <= shipMax) {
-                                targets.push(adjB)
+                        if (available.includes(adjT)) {
+                            if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
+                                targets.push(adjT)
                             }
+                        } else { // prefer top
+                            if (available.includes(adjB)) {
+                                if (((adjB - top) / boardLength) + 1 <= shipMax) {
+                                    targets.push(adjB)
+                                }
+                            }
+                        }
+                    }
+                    if (targets.length === 0) {
+                        if (hits[hits.indexOf(current) + 1]) {
+                            console.log('current', current, hits)
+                            hit = hits[hits.indexOf(current) + 1]
+                            console.log('current now', hit)
+                        } else {
+                            hit = hits[0]
                         }
                     }
                 }
             }
+            // if (targets.length === 0) {
+            //     console.log('what')
+            //     const index = hits.indexOf(hit)
+            //
+            //     if (hits[index + 1]) {
+            //         hit = hits[index + 1]
+            //     } else {
+            //         hit = hits[0]
+            //     }
+            // }
 
-            if (targets.length === 0) { // hit square was isolated
+            console.log('hitXXX', hit)
+
+            if (targets.length === 0) { // hit square was isolated or had no valid adjacents
                 let mod = 0
                 while (mod <= hit) {
                     mod += boardLength
@@ -172,6 +197,7 @@ export default class Computer extends Player {
                         }
                     }
                 }
+                console.log('hit', hit)
                 if (targets.length === 0) { // prefer left, then right -- can only get here if there was no valid target to left
                     while (available.includes(right)) {
                         right += 1
@@ -182,6 +208,7 @@ export default class Computer extends Player {
                         }
                     }
                     if (targets.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
+                        console.log('here', top)
                         while (available.includes(top)) {
                             top -= boardLength
 
