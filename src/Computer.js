@@ -46,9 +46,7 @@ export default class Computer extends Player {
                         mod += boardLength
                     }
 
-                    console.log(mod, hit - 1, hit - 1 >= mod - boardLength)
                     let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
-                    console.log('left', left)
                     let right = (hit + 1) < mod ? hit + 1 : null
                     let top = hit - boardLength
                     let bottom = hit + boardLength
@@ -99,16 +97,17 @@ export default class Computer extends Player {
                 const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
                 const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
 
-                console.log('horiz', horizontal)
-
                 if (horizontal.length >= vertical.length) {
-                    let left = horizontal[0] === hit ? null : horizontal[0]
-                    let adjL = left === null ? null : left - 1
-                    if (adjL === null) { left = hit }
+                    let left = horizontal[0]
 
-                    let right = horizontal[horizontal.length - 1] === hit ? null : horizontal[horizontal.length - 1]
-                    let adjR = right === null ? null : right + 1
-                    if (adjR === null) { right = hit }
+                    let mod = boardLength
+                    while (mod <= left) {
+                        mod += boardLength
+                    }
+                    let adjL = left - 1 > mod - boardLength ? left - 1 : null // ternary check prevents wrapping
+
+                    let right = horizontal[horizontal.length - 1]
+                    let adjR = right + 1 < mod ? right + 1 : null
 
                     if (available.includes(adjL)) {
                         if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
@@ -174,27 +173,12 @@ export default class Computer extends Player {
                     }
                 }
                 if (targets.length === 0) { // prefer left, then right -- can only get here if there was no valid target to left
-                    left = hit - 1 // reset left
-
-                    while (available.includes(right)) { // how much free space to right?
+                    while (available.includes(right)) {
                         right += 1
-
-                        if (!available.includes(right)) { // found end of free space on right
-                            if (!available.includes(left)) { // found end of free space on left -- there was none
-                                if ((right - left) - 1 >= shipMin) {
-                                    targets.push(hit + 1) // no free space on right but enough on left to fit smallest ship, therefore 1 square right of hit is valid target
-                                }
-                            } else {
-                                while (available.includes(left)) { // find free space on left
-                                    left -= 1
-
-                                    if (!available.includes(left)) { // found end of free space on both sides
-                                        if ((right - left) - 1 >= shipMin) { // amount of space can fit smallest ship? -- right and left are unavailable spaces, so don't + 1,  actually - 1
-                                            targets.push(hit + 1) // if so, square is valid target
-                                        }
-                                    }
-                                }
-                            }
+                    }
+                    if ((right - left) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
+                        if (available.includes(hit + 1)) {
+                            targets.push(hit + 1)
                         }
                     }
                     if (targets.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
@@ -203,7 +187,7 @@ export default class Computer extends Player {
 
                             if (!available.includes(top)) { // found end of free space on top
                                 if (!available.includes(bottom)) { // found end of free space on bottom -- there was none
-                                    if ((bottom - top) - 1 >= shipMin) {
+                                    if (((bottom - top) / boardLength) - 1 >= shipMin) {
                                         targets.push(hit - boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square above hit is valid target
                                     }
                                 } else {
@@ -211,7 +195,7 @@ export default class Computer extends Player {
                                         bottom += boardLength
 
                                         if (!available.includes(bottom)) { // found end of free space on both sides
-                                            if ((bottom - top) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1,  actually - 1
+                                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1,  actually - 1
                                                 targets.push(hit -  boardLength) // if so, square is valid target
                                             }
                                         }
@@ -220,27 +204,13 @@ export default class Computer extends Player {
                             }
                         }
                         if (targets.length === 0) { // prefer left, then right, then top, finally bottom if none else
-                            top = hit - boardLength // reset top
-
-                            if (available.includes(bottom)) {
+                            while (available.includes(bottom)) {
                                 bottom += boardLength
+                            }
 
-                                if (!available.includes(bottom)) { // found end of free space on bottom
-                                    if (!available.includes(top)) { // found end of free space on top -- there was none
-                                        if ((bottom - top) - 1 >= shipMin) {
-                                            targets.push(hit + boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square below hit is valid target
-                                        }
-                                    } else {
-                                        while (available.includes(top)) { // find free space on top
-                                            top -= boardLength
-
-                                            if (!available.includes(top)) { // found end of free space on both sides
-                                                if ((bottom - top) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1, actually - 1
-                                                    targets.push(hit +  boardLength) // if so, square is valid target
-                                                }
-                                            }
-                                        }
-                                    }
+                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
+                                if (available.includes(hit + boardLength)) {
+                                    targets.push(hit + boardLength)
                                 }
                             }
                         }
@@ -267,7 +237,7 @@ export default class Computer extends Player {
 
             const target = available[randomInt(0, available.length)]
 
-            console.log('B generated target:', target)
+            console.log('C generated target:', target)
             this.attack(target) // no previous hits, random target
         }
     }
