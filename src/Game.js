@@ -1,5 +1,5 @@
-import Player from './Player'
 import EventEmitter from "./events";
+import Player from './Player'
 
 export default class Game {
     constructor(container, settings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
@@ -58,27 +58,26 @@ export default class Game {
                     setTimeout(this.play.bind(this), 2000)
                 })
             } else {
-                this.events.on('Attack', (data) => {
+                this.events.on('Attack', (square) => {
                     let length = player.board.length
                     let mod = length
 
                     let row = 0 // index of row
-                    while (mod <= data.square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
+                    while (mod <= square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
                         mod += length
                         row++
                     }
+                    const column = length - (mod - square)
 
-                    const column = length - (mod - data.square)
+                    const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
 
-                    const square = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
+                    const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
 
-                    const result = this.sendAttempt(data) // sendAttempt will change attacker and victim board data to be rendered later
-
-                    if (result !== false && !square.classList.contains('sunk')) { // render result immediately in attacker DOM
-                        square.classList.add('hit')
-                        square.classList.add(`q${result}`) // 1+ hits
+                    if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
+                        render.classList.add('hit')
+                        render.classList.add(`q${result}`) // 1+ hits
                     } else {
-                        square.classList.add('miss')
+                        render.classList.add('miss')
                     }
 
                     this.turn += 1
@@ -112,7 +111,7 @@ export default class Game {
             if (victim !== attacker) { // everyone who isn't the player sending the attempt
                 console.log('player about to receive, pID', victim.id, ' data.pID (attacker?)', attacker.id)
 
-                if (victim.receive(data.square, data.player) === true) { // victim will send out a hit or miss event to change attacker backend
+                if (victim.receive(data.square) === true) { // victim will send out a hit or miss event to change attacker backend
                     // attacker.markHit(data.square)
                     hits += 1
                 }

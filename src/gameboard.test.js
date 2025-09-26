@@ -89,30 +89,30 @@ test('Place invalid duplicate vertical boat single overlap', () => {
 })
 
 test('Hit boat', () => {
-    const player = new Player('p1', 1, null, {boardLength: 8, shipLengths: [3,4,5,6]}) // dummy player will be different from implicit owner of board below
+    const player = new Player() // dummy player will be different from implicit owner of board below
     const board = new Gameboard(8)
 
-    const listener = jest.fn()
+    // const listener = jest.fn()
 
     // board.events.on('hit', listener)
 
     expect(board.place([9,17,25,33,41,49])).toBeTruthy()
-    expect(board.attack(9, player)).toBeTruthy() // Probably the board should take as little information as possible.
+    expect(board.attack(9)).toBeTruthy() // Probably the board should take as little information as possible.
 
     // expect(listener).toHaveBeenCalled()
     // expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9, allShipsDead: false })) // The listener represents either a player object or boat object that listeners for the board to emit hit events
 })
 
 test('Miss attack', () => {
-    const player = new Player('p1', 1, null, {boardLength: 8, shipLengths: [3,4,5,6]})
+    const player = new Player()
     const board = new Gameboard(8)
 
-    const listener = jest.fn()
+    // const listener = jest.fn()
 
     // board.events.on('miss', listener)
 
     expect(board.place([8,16,24,32,40,48])).toBeTruthy()
-    expect(board.attack(9, player)).toBeFalsy() // Probably the board should take as little information as possible.
+    expect(board.attack(9)).toBeFalsy() // Probably the board should take as little information as possible.
 
     // expect(listener).toHaveBeenCalled()
     // expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9 })) // The listener represents either a player object or boat object that listeners for the board to emit hit events

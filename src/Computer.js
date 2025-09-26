@@ -5,12 +5,10 @@ export default class Computer extends Player {
         super(id, eventsP, gameSettings);
 
         this.name = null
+        this.isReal = false
     }
 
     generateAttack() { // I should generate an adjacency list of a map of available squares. If no previous hits are found, target the square w/ most adjacents, i.e., most isolated square farthest away from nearest sink
-        function randomInt(min, max) {
-            return Math.floor(Math.random() * (max - min) ) + min;
-        }
         const boardLength = this.board.length
 
         const alive = []
@@ -40,13 +38,20 @@ export default class Computer extends Player {
             if (hits.length > 1) {
                 const hitMap = {}
 
-                for (let square of hits) { // building adjacency list of contiguous hits
+                for (let hit of hits) { // building adjacency list of contiguous hits
                     const adjacents = []
 
-                    let left = square - 1
-                    let right = square + 1
-                    let top = square - boardLength
-                    let bottom = square + boardLength
+                    let mod = 0
+                    while (mod <= hit) {
+                        mod += boardLength
+                    }
+
+                    console.log(mod, hit - 1, hit - 1 >= mod - boardLength)
+                    let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
+                    console.log('left', left)
+                    let right = (hit + 1) < mod ? hit + 1 : null
+                    let top = hit - boardLength
+                    let bottom = hit + boardLength
 
                     let adjacent = [] // adjacents array is grouped into subarrays: left, right, top, bottom
                     while (hits.includes(left)) {
@@ -80,7 +85,7 @@ export default class Computer extends Player {
                     }
                     adjacents.push(adjacent)
 
-                    hitMap[square] = adjacents
+                    hitMap[hit] = adjacents
                 }
 
                 let current = Object.keys(hitMap)[0]
@@ -89,16 +94,21 @@ export default class Computer extends Player {
                         current = hit
                     }
                 }
-                hit = current
+                hit = Number(current)
 
-                const horizontal = [...hitMap[hit][0], hit, ...hitMap[hit][1]] // left, hit, right
-                const vertical = [...hitMap[hit][2], hit, ...hitMap[hit][3]] // top, hit, bottom
+                const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
+                const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
+
+                console.log('horiz', horizontal)
 
                 if (horizontal.length >= vertical.length) {
-                    let left = horizontal[0]
-                    let adjL = left - 1
-                    let right = horizontal[horizontal.length - 1]
-                    let adjR = right + 1
+                    let left = horizontal[0] === hit ? null : horizontal[0]
+                    let adjL = left === null ? null : left - 1
+                    if (adjL === null) { left = hit }
+
+                    let right = horizontal[horizontal.length - 1] === hit ? null : horizontal[horizontal.length - 1]
+                    let adjR = right === null ? null : right + 1
+                    if (adjR === null) { right = hit }
 
                     if (available.includes(adjL)) {
                         if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
@@ -131,9 +141,14 @@ export default class Computer extends Player {
                 }
             }
 
-           if (targets.length === 0) { // hit square was isolated
-                let left = hit - 1
-                let right = hit + 1
+            if (targets.length === 0) { // hit square was isolated
+                let mod = 0
+                while (mod <= hit) {
+                    mod += boardLength
+                }
+
+                let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
+                let right = (hit + 1) < mod ? hit + 1 : null
                 let top = hit - boardLength
                 let bottom = hit + boardLength
 
@@ -231,22 +246,29 @@ export default class Computer extends Player {
                         }
                     }
                 }
-                if (targets.length === 0 || targets.length >= 2) {
-                    throw Error('isolated hit square somehow had no valid adjacent targets or had more than 1 assigned, something is wrong w/ logic')
-                } else { // isolated hit square had valid targets adjacent
-                    this.attack(targets[0])
+                if (targets.length === 1) {
+                    console.log('A generated target:', targets[0])
+                    this.attack(targets[0]) // isolated hit square had valid targets adjacent
+                } else {
+                    throw Error(`isolated hit square somehow had no valid adjacent targets or had more than 1 assigned, something is wrong w/ logic -- targets.length: ${targets.length}`)
                 }
-           } else if (targets.length === 1) { // chain of hits had valid targets adjacent
-                this.attack(targets[0])
-           } else {
+            } else if (targets.length === 1) {
+               console.log('B generated target:', targets[0])
+                this.attack(targets[0]) // chain of hits had valid targets adjacent
+            } else {
                throw Error('chain of hits somehow had more than 1 valid adjacent target assigned, something is wrong w/ logic')
-           }
+            }
         } else { // no hits, pick random square or most isolated square (exploitable if not unpredictably switching between most-isolated and true random targets)
+            function randomInt(min, max) {
+                return Math.floor(Math.random() * (max - min) ) + min;
+            }
+
             // write logic to find most isolated square using adjacency list, target being the node w/ most free adjacents
 
             const target = available[randomInt(0, available.length)]
 
-            this.attack(target)
+            console.log('B generated target:', target)
+            this.attack(target) // no previous hits, random target
         }
     }
 

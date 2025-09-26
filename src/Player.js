@@ -3,10 +3,11 @@ import Gameboard from "./Gameboard";
 import Ship from './Ship';
 
 export default class Player {
-    constructor(id, eventsP, gameSettings, name = `Player${id}`) {
+    constructor(id = 1, eventsP = null, gameSettings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }, name = `Player${id}`) {
         this.name = name;
         this.id = id // Player 1, 2...
         this.defeated = false
+        this.isReal = true
 
         this.board = new Gameboard(gameSettings.boardLength);
         this._render = null
@@ -28,7 +29,7 @@ export default class Player {
     }
 
     set render(renderX) {
-        console.log('render player', this)
+        // console.log('render player', this)
 
         if (renderX !== undefined) {
             this._render = renderX
@@ -73,7 +74,7 @@ export default class Player {
                 this.board.renderOffense = this.attack.bind(this)  /// render offense
 
                 let offense = this.board.renderOffense
-                console.log('append offense', offense)
+                // console.log('append offense', offense)
                 renderX.append(offense)
             }
 
@@ -103,7 +104,8 @@ export default class Player {
     }
 
     place(array) {
-        console.log(array, this)
+        // console.log(array, this)
+
         if (this.board.place(array) === true) { // if true, successful placement
             for (let ship of this.ships) {
                 if (ship.length === array.length) { // this is a weakness, can't have multiple ships of same length -- need a better way to identify ships, but would need ship drop event to transfer entire ship object
@@ -114,7 +116,7 @@ export default class Player {
                             return true // If any unplaced, return so code below isn't executed
                         }
                     }
-                    console.log("All ships placed event emitting")
+                    // console.log("All ships placed event emitting")
 
                     this.allShipsPlaced = true
                     this.eventsP.emit("All ships placed")
@@ -126,11 +128,27 @@ export default class Player {
         }
     }
 
-    receive(square, attacker) {
-        console.log('receive', square, 'attacker:', attacker, "this:", this)
+    attack(square) {
+        // console.log('player attack', square, 'playerID', this.id)
 
-        if (this.board.attack(square, attacker) === true) { // if true, successful attack
-            for (let ship of this.ships) {
+        if (this.board.attack(square, true) === true) { // keep track of your attacks
+            // console.log('emitting attack')
+
+            if (this.eventsP !== null) {
+                this.eventsP.emit('Attack', square)
+            } else {
+                throw Error('Player has no parent events object to which it can emit attack event!')
+            }
+        } else {
+            throw Error("Invalid square!")
+        }
+    }
+
+    receive(square) {
+        // console.log('receive', square, 'attacker:', attacker, "this:", this)
+
+        if (this.board.attack(square) === true) { // if true, successful attack is now saved on backend
+            for (let ship of this.ships) { // save successful attack on ship itself
                 if (ship.pos.includes(square)) {
                     this.events.emit("Hit received", { square: square, player: this }) // must send hit event before changing ship, which may send sunk event
 
@@ -140,24 +158,13 @@ export default class Player {
             }
             return true
         } else {
-            this.events.emit("Miss received", { square: square, player: this})
+            this.events.emit("Miss received", { square: square, player: this })
             return false
         }
     }
 
-    attack(square) {
-        console.log('player attack', square, this)
-
-        if (this.board.attack(square, this) === true) { // keep track of your attacks
-            console.log('emitting attack')
-            this.eventsP.emit('Attack', { square: square, player: this })
-        } else {
-            throw Error("Invalid square!")
-        }
-    }
-
     markHit(square) {
-        console.log('markhit', square, this)
+        // console.log('markhit', square, this)
 
         if (this.board.offense[square] !== -1) {
             if (this.board.offense[square] >= 2) {
@@ -172,7 +179,7 @@ export default class Player {
     }
 
     markMiss(square) {
-        console.log('markmiss', square, this)
+        // console.log('markmiss', square, this)
 
         if (this.board.offense[square] >= 0) {
             this.board.offense[square] = 1 // 1 is a miss, 2+ is a hit, -1 is a sunken square
@@ -182,7 +189,7 @@ export default class Player {
     }
 
     markSink(ship) {
-        console.log('marsink', ship, this)
+        // console.log('marsink', ship, this)
 
         ship.pos.forEach((square) => {
             this.board.offense[square] = -1
@@ -190,7 +197,7 @@ export default class Player {
     }
 
     scuttle(ship) {
-        console.log('scuttle', this, ship, this.survivors)
+        // console.log('scuttle', this, ship, this.survivors)
 
         this.survivors -= 1
 

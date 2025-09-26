@@ -1,4 +1,3 @@
-import EventEmitter from './events';
 import sort from './sort'
 
 export default class Gameboard {
@@ -52,7 +51,7 @@ export default class Gameboard {
                                 const length = dropped.length
                                 const vertical = dropped.vertical
                                 const reversed = dropped.reversed
-                                console.log('dropped', dropped)
+                                // console.log('dropped', dropped)
 
                                 let array = []
                                 if (!vertical) {
@@ -129,7 +128,7 @@ export default class Gameboard {
                                         }
                                     }
                                 } else {
-                                    console.log('invalid placement')
+                                    // console.log('invalid placement')
                                 }
                             })
                         } else { // already playing, don't need to render ship placement
@@ -276,25 +275,16 @@ export default class Gameboard {
         return true
     }
 
-    attack(square, attacker) {
-        console.log('board attack', square, 'attacker', attacker, 'this', this)
+    attack(square, attackSelf = false) {
+        // console.log('board attack', square, 'attackSelf', attackSelf)
 
-        if (attacker.board === this) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
-            console.log('self attack')
-            const board = this.offense
+        if (attackSelf === true) { // If true, parent of board is attacking, so this function was called to keep track of attacks -- Don't attack self!
+            // console.log('self attack')
 
-            if (board[square] === 0) { // check validity of attack
-                // board[square] = 1 // 1 is a missed attack, set it for default --- update: don't do anything, let the miss event handle it
-
-                return true
-            } /*else if (board[square] === 1) {
-                board[square] = 2 // mark successful hit
-                return true
-            }*/ else {
-                return false
-            }
+            return this.offense[square] === 0;
         } else { // parent of board is being attacked
-            console.log('enemy attack')
+            // console.log('enemy attack')
+
             const board = this.defense
 
             if (board[square] === 1) {
