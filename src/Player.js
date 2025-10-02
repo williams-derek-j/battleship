@@ -104,7 +104,7 @@ export default class Player {
     }
 
     place(array) {
-        // console.log(array, this)
+        console.log('place, array:', array)
 
         if (this.board.place(array) === true) { // if true, successful placement
             for (let ship of this.ships) {

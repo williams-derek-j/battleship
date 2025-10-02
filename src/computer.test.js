@@ -1,6 +1,20 @@
 import EventEmitter from './Events'
 import Computer from './Computer'
 
+test.only('Place ships', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP)
+
+    const listener = jest.fn()
+    comp.eventsP.on("All ships placed", listener)
+
+    comp.placeShips()
+
+    expect(listener).toHaveBeenCalled()
+    expect(comp.allShipsPlaced).toEqual(true)
+})
+
 test('Attack empty board', () => {
     const eventsP = new EventEmitter()
 
@@ -38,7 +52,6 @@ test('Attack lone hit', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([1,8,10,17]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack pair of hits', () => {
@@ -63,7 +76,6 @@ test('Attack pair of hits', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([8,11]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack vertical pair of hits', () => {
@@ -88,7 +100,6 @@ test('Attack vertical pair of hits', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([1,25]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack triple of hits', () => {
@@ -114,7 +125,6 @@ test('Attack triple of hits', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([8,12]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack vertical triple of hits', () => {
@@ -140,7 +150,6 @@ test('Attack vertical triple of hits', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([2,34]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack triple of hits on wall', () => {
@@ -166,7 +175,6 @@ test('Attack triple of hits on wall', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([11]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack pair of hits on opposite wall', () => {
@@ -192,7 +200,6 @@ test('Attack pair of hits on opposite wall', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([12]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack triple of hits on ceiling', () => {
@@ -218,7 +225,6 @@ test('Attack triple of hits on ceiling', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([30]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack triple of hits on floor', () => {
@@ -244,7 +250,6 @@ test('Attack triple of hits on floor', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([38]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack other side after miss', () => {
@@ -270,7 +275,6 @@ test('Attack other side after miss', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([3]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack other side after miss vertical', () => {
@@ -296,7 +300,6 @@ test('Attack other side after miss vertical', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([24]).toContain(listener.mock.calls[0][0])
-    console.log(listener.mock.calls[0][0])
 })
 
 test('Attack fake line', () => {
@@ -698,6 +701,177 @@ test('Attack cross 2', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([19]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack cross 3', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP)
+
+    comp.board.offense[4] = 1
+    comp.board.offense[12] = 2
+    comp.board.offense[20] = 2
+    comp.board.offense[28] = -1
+    comp.board.offense[32] = -1
+    comp.board.offense[33] = -1
+    comp.board.offense[34] = -1
+    comp.board.offense[35] = -1
+    comp.board.offense[36] = -1
+    comp.board.offense[37] = -1
+    comp.board.offense[38] = -1
+    comp.board.offense[39] = -1
+    comp.board.offense[44] = -1
+    comp.board.offense[52] = -1
+    comp.board.offense[60] = 2
+
+    // [   0 _,_,_,_,M,_,_,_7
+    //     8 o,o,o,X,H,_,_,_15
+    //     16_,_,_,o,H,o,o,_23
+    //     24_,_,_,_,S,_,_,_31
+    //     32s,s,s,s,S,s,s,s39
+    //     40_,_,_,_,S,_,_,_47
+    //     48_,_,_,_,S,_,_,_55
+    //     56_,_,_,o,H,o,o,_63   ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([11]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack cross 4', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP)
+
+    comp.board.offense[4] = 1
+    comp.board.offense[8] = -1
+    comp.board.offense[9] = -1
+    comp.board.offense[10] = -1
+    comp.board.offense[11] = -1
+    comp.board.offense[12] = -1
+    comp.board.offense[20] = 2
+    comp.board.offense[28] = -1
+    comp.board.offense[32] = -1
+    comp.board.offense[33] = -1
+    comp.board.offense[34] = -1
+    comp.board.offense[35] = -1
+    comp.board.offense[36] = -1
+    comp.board.offense[37] = -1
+    comp.board.offense[38] = -1
+    comp.board.offense[39] = -1
+    comp.board.offense[44] = -1
+    comp.board.offense[52] = -1
+    comp.board.offense[60] = 2
+
+    // [   0 _,_,_,_,M,_,_,_7
+    //     8 S,S,S,S,S,_,_,_15
+    //     16_,_,_,X,H,o,o,_23
+    //     24_,_,_,_,S,_,_,_31
+    //     32s,s,s,s,S,s,s,s39
+    //     40_,_,_,_,S,_,_,_47
+    //     48_,_,_,_,S,_,_,_55
+    //     56_,_,_,o,H,o,o,_63   ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([19]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack cross 5', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP)
+
+    comp.board.offense[4] = 1
+    comp.board.offense[8] = -1
+    comp.board.offense[9] = -1
+    comp.board.offense[10] = -1
+    comp.board.offense[11] = -1
+    comp.board.offense[12] = -1
+    comp.board.offense[20] = 2
+    comp.board.offense[28] = -1
+    comp.board.offense[32] = -1
+    comp.board.offense[33] = -1
+    comp.board.offense[34] = -1
+    comp.board.offense[35] = -1
+    comp.board.offense[36] = -1
+    comp.board.offense[37] = -1
+    comp.board.offense[38] = -1
+    comp.board.offense[39] = -1
+    comp.board.offense[44] = -1
+    comp.board.offense[52] = -1
+    comp.board.offense[60] = 2
+
+    // [   0 _,_,_,_,M,_,_,_7
+    //     8 S,S,S,S,S,_,_,_15
+    //     16_,_,_,X,H,o,o,_23
+    //     24_,_,_,_,S,_,_,_31
+    //     32s,s,s,s,S,s,s,s39
+    //     40_,_,_,_,S,_,_,_47
+    //     48_,_,_,_,S,_,_,_55
+    //     56_,_,_,o,H,o,o,_63   ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([19]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack cross 6', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP)
+
+    comp.board.offense[4] = 1
+    comp.board.offense[8] = -1
+    comp.board.offense[9] = -1
+    comp.board.offense[10] = -1
+    comp.board.offense[11] = -1
+    comp.board.offense[12] = -1
+    comp.board.offense[19] = -1
+    comp.board.offense[20] = -1
+    comp.board.offense[21] = -1
+    comp.board.offense[22] = -1
+    comp.board.offense[28] = -1
+    comp.board.offense[32] = -1
+    comp.board.offense[33] = -1
+    comp.board.offense[34] = -1
+    comp.board.offense[35] = -1
+    comp.board.offense[36] = -1
+    comp.board.offense[37] = -1
+    comp.board.offense[38] = -1
+    comp.board.offense[39] = -1
+    comp.board.offense[44] = -1
+    comp.board.offense[52] = -1
+    comp.board.offense[60] = 2
+
+    // [   0 _,_,_,_,M,_,_,_7
+    //     8 S,S,S,S,S,_,_,_15
+    //     16_,_,_,s,s,s,s,_23
+    //     24_,_,_,_,S,_,_,_31
+    //     32s,s,s,s,S,s,s,s39
+    //     40_,_,_,_,S,_,_,_47
+    //     48_,_,_,_,S,_,_,_55
+    //     56_,_,_,X,H,o,o,_63   ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([59]).toContain(listener.mock.calls[0][0])
 })
 
 // [   0 _,_,_,_,_,_,_,_7

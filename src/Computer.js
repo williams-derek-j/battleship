@@ -93,79 +93,56 @@ export default class Computer extends Player {
                     }
                 }
                 hit = Number(current)
+                // console.log('hit', hit, typeof hit, hits.indexOf(hit))
 
-                while (targets.length === 0) {
-                    const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
-                    const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
-                    console.log(horizontal,vertical)
+                const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
+                const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
 
-                    if (horizontal.length >= vertical.length) {
-                        let left = horizontal[0]
+                if (horizontal.length >= vertical.length) {
+                    let left = horizontal[0]
 
-                        let mod = boardLength
-                        while (mod <= left) {
-                            mod += boardLength
+                    let mod = boardLength
+                    while (mod <= left) {
+                        mod += boardLength
+                    }
+                    let adjL = left - 1 >= mod - boardLength ? left - 1 : null // ternary check prevents wrapping
+
+                    let right = horizontal[horizontal.length - 1]
+                    let adjR = right + 1 < mod ? right + 1 : null
+
+                    if (available.includes(adjL)) {
+                        if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
+                            targets.push(adjL)
                         }
-                        let adjL = left - 1 > mod - boardLength ? left - 1 : null // ternary check prevents wrapping
-
-                        let right = horizontal[horizontal.length - 1]
-                        let adjR = right + 1 < mod ? right + 1 : null
-
-                        if (available.includes(adjL)) {
-                            if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
-                                targets.push(adjL)
-                            }
-                        } else { // prefer left, could rewrite to randomly pick left or right
-                            if (available.includes(adjR)) {
-                                if ((adjR - left) + 1 <= shipMax) {
-                                    targets.push(adjR)
-                                }
+                    } else { // prefer left, could rewrite to randomly pick left or right
+                        if (available.includes(adjR)) {
+                            if ((adjR - left) + 1 <= shipMax) {
+                                targets.push(adjR)
                             }
                         }
                     }
-                    if (targets.length === 0) { // horizontal might have been longer but had no available targets
-                        let top = vertical[0]
-                        let adjT = top - boardLength
-                        let bottom =  vertical[vertical.length - 1]
-                        let adjB = bottom + boardLength
+                }
+                if (targets.length === 0) { // horizontal might have been longer but had no available targets
+                    let top = vertical[0]
+                    let adjT = top - boardLength
+                    let bottom =  vertical[vertical.length - 1]
+                    let adjB = bottom + boardLength
 
-                        if (available.includes(adjT)) {
-                            if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
-                                targets.push(adjT)
-                            }
-                        } else { // prefer top
-                            if (available.includes(adjB)) {
-                                if (((adjB - top) / boardLength) + 1 <= shipMax) {
-                                    targets.push(adjB)
-                                }
-                            }
+                    if (available.includes(adjT)) {
+                        if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
+                            targets.push(adjT)
                         }
-                    }
-                    if (targets.length === 0) {
-                        if (hits[hits.indexOf(current) + 1]) {
-                            console.log('current', current, hits)
-                            hit = hits[hits.indexOf(current) + 1]
-                            console.log('current now', hit)
-                        } else {
-                            hit = hits[0]
+                    } else { // prefer top
+                        if (available.includes(adjB)) {
+                            if (((adjB - top) / boardLength) + 1 <= shipMax) {
+                                targets.push(adjB)
+                            }
                         }
                     }
                 }
             }
-            // if (targets.length === 0) {
-            //     console.log('what')
-            //     const index = hits.indexOf(hit)
-            //
-            //     if (hits[index + 1]) {
-            //         hit = hits[index + 1]
-            //     } else {
-            //         hit = hits[0]
-            //     }
-            // }
 
-            console.log('hitXXX', hit)
-
-            if (targets.length === 0) { // hit square was isolated or had no valid adjacents
+            if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
                 let mod = 0
                 while (mod <= hit) {
                     mod += boardLength
@@ -197,7 +174,6 @@ export default class Computer extends Player {
                         }
                     }
                 }
-                console.log('hit', hit)
                 if (targets.length === 0) { // prefer left, then right -- can only get here if there was no valid target to left
                     while (available.includes(right)) {
                         right += 1
@@ -208,7 +184,6 @@ export default class Computer extends Player {
                         }
                     }
                     if (targets.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
-                        console.log('here', top)
                         while (available.includes(top)) {
                             top -= boardLength
 
@@ -269,145 +244,55 @@ export default class Computer extends Player {
         }
     }
 
-    placeShips() { // generate a random placement for ships
+    generateShip(ship) {
         function randomInt(min, max) {
             return Math.floor(Math.random() * (max - min) ) + min;
         }
 
-        const available = []
-        for (let i = 0; i < this.board.length ** 2; i++) {
-            available.push(i)
+        const boardLength = this.board.length
+        const coords = []
+        let vertical = false
+
+        if (randomInt(0, 2) === 0) { // generate 50/50 chance
+            vertical = true
         }
 
+        if (!vertical) { // horizontal
+            let square = randomInt(0, boardLength ** 2)
+
+            let mod = boardLength
+            while (mod <= square) {
+                mod += boardLength
+            }
+            while (mod - square < ship.length) { // num is too far right on board, no space for ship
+                square -= ship.length - (mod - square)
+            }
+
+            coords.push(square)
+
+            for (let i = 1; i < ship.length; i++) {
+                const adjacent = square + i
+                coords.push(adjacent)
+            }
+        } else { // vertical
+            const square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+            coords.push(square)
+
+            for (let i = boardLength; i <= (ship.length - 1) * boardLength; i + boardLength) {
+                const adjacent = square + i
+                coords.push(adjacent)
+            }
+        }
+
+        return coords
+    }
+
+    placeShips() { // generate a random placement for ships
         for (let ship of this.ships) {
-            const coords = []
-            let vertical = false
-            let reversed = false
-            const boardLength = this.board.length
+            let coords = this.generateShip(ship)
 
-            if (randomInt(0, 2) === 0) { // generate 50/50 chance
-                vertical = true
-            }
-            if (randomInt(0, 2) === 0) { // generate 50/50 chance
-                reversed = true
-            }
-
-            if (!vertical) {
-                if (!reversed) { // horizontal -->
-                    while (true) {
-                        const square = randomInt(0, boardLength ** 2)
-
-                        let mod = boardLength
-                        while (mod <= square) {
-                            mod += boardLength
-                        }
-                        if (mod - square < ship.length) { // num is too far right on board, no space for ship
-                            continue // reset & skip rest of loop
-                        }
-
-                        if (available.includes(square)) { // if false, restart loop
-                            coords.push(square)
-                            available.splice(square, 1)
-
-                            for (let i = 1; i < ship.length; i++) {
-                                const adjacent = square + i
-
-                                if (available.includes(adjacent)) {
-                                    coords.push(adjacent)
-                                    available.splice(adjacent, 1)
-                                } else {
-                                    i = ship.length // restart loop
-                                }
-                            }
-                            if (coords.length === ship.length) {
-                                break
-                            }
-                        }
-                    }
-                } else { // horizontal <--
-                    while (true) {
-                        const square = randomInt(0, boardLength ** 2)
-
-                        let mod = boardLength
-                        while (mod <= square) {
-                            mod += boardLength
-                        }
-                        if ((mod - boardLength) + square < ship.length) { // num is too far left on board, no space for ship
-                            continue // reset & skip rest of loop
-                        }
-
-                        if (available.includes(square)) { // if false, restart loop
-                            coords.push(square)
-                            available.splice(square, 1)
-
-                            for (let i = 1; i < ship.length; i++) {
-                                const adjacent = square - 1
-
-                                if (available.includes(adjacent)) {
-                                    coords.push(adjacent)
-                                    available.splice(adjacent, 1)
-                                } else {
-                                    i = ship.length // restart loop
-                                }
-                            }
-                            if (coords.length === ship.length) {
-                                break
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (!reversed) { // vertical V top to bottom
-                    while (true) {
-                        const square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
-
-                        if (available.includes(square)) { // if false, restart loop
-                            coords.push(square)
-                            available.splice(square, 1)
-
-                            for (let i = boardLength; i <= (ship.length - 1) * boardLength; i + boardLength) {
-                                const adjacent = square + i
-
-                                if (available.includes(adjacent)) {
-                                    coords.push(adjacent)
-                                    available.splice(adjacent, 1)
-                                } else {
-                                    i = ship.length // restart loop
-                                }
-                            }
-                            if (coords.length === ship.length) {
-                                break
-                            }
-                        }
-                    }
-                } else { // vertical ^ bottom to top
-                    while (true) {
-                        const square = randomInt((ship.length - 1 * boardLength), boardLength ** 2)
-
-                        if (available.includes(square)) { // if false, restart loop
-                            coords.push(square)
-                            available.splice(square, 1)
-
-                            for (let i = boardLength; i <= (ship.length - 1) * boardLength; i + boardLength) {
-                                const adjacent = square - i
-
-                                if (available.includes(adjacent)) {
-                                    coords.push(adjacent)
-                                    available.splice(adjacent, 1)
-                                } else {
-                                    i = ship.length // restart loop
-                                }
-                            }
-                            if (coords.length === ship.length) {
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (this.place(coords) !== true) { // place ship in backend, & if last ship, 'all ships placed' will be fired to game object's event listener and next round will start
-                throw Error('Generated supposedly valid ship coordinates that failed to place!') // something is wrong w/ logic above
+            while (this.place(coords) !== true) {
+                coords = this.generateShip(ship)
             }
         }
     }
