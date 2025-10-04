@@ -244,55 +244,134 @@ export default class Computer extends Player {
         }
     }
 
-    generateShip(ship) {
-        function randomInt(min, max) {
-            return Math.floor(Math.random() * (max - min) ) + min;
-        }
-
+    generateHorizontal(square, ship) {
         const boardLength = this.board.length
         const coords = []
-        let vertical = false
 
-        if (randomInt(0, 2) === 0) { // generate 50/50 chance
-            vertical = true
+        let mod = boardLength
+        while (mod <= square) {
+            mod += boardLength
+        }
+        if (mod - square < ship.length) { // num is too far right on board, no space for ship
+            square -= ship.length - (mod - square)
         }
 
-        if (!vertical) { // horizontal
-            let square = randomInt(0, boardLength ** 2)
+        coords.push(square)
 
-            let mod = boardLength
-            while (mod <= square) {
-                mod += boardLength
-            }
-            while (mod - square < ship.length) { // num is too far right on board, no space for ship
-                square -= ship.length - (mod - square)
-            }
-
-            coords.push(square)
-
-            for (let i = 1; i < ship.length; i++) {
-                const adjacent = square + i
-                coords.push(adjacent)
-            }
-        } else { // vertical
-            const square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
-            coords.push(square)
-
-            for (let i = boardLength; i <= (ship.length - 1) * boardLength; i + boardLength) {
-                const adjacent = square + i
-                coords.push(adjacent)
-            }
+        for (let i = 1; i < ship.length; i++) {
+            const adjacent = square + i
+            coords.push(adjacent)
         }
 
         return coords
     }
 
-    placeShips() { // generate a random placement for ships
-        for (let ship of this.ships) {
-            let coords = this.generateShip(ship)
+    generateVertical(square, ship) {
+        const boardLength = this.board.length
+        const coords = []
 
-            while (this.place(coords) !== true) {
-                coords = this.generateShip(ship)
+        coords.push(square)
+
+        for (let i = boardLength; i <= (ship.length - 1) * boardLength; i += boardLength) {
+            const adjacent = square + i
+            coords.push(adjacent)
+        }
+
+        return coords
+    }
+
+    // generateShip(ship) {
+    //     function randomInt(min, max) {
+    //         return Math.floor(Math.random() * (max - min) ) + min;
+    //     }
+    //
+    //     const boardLength = this.board.length
+    //     const coords = []
+    //     let vertical = false
+    //
+    //     if (randomInt(0, 2) === 0) { // generate 50/50 chance
+    //         vertical = true
+    //     }
+    //
+    //     if (!vertical) { // horizontal
+    //         let square = randomInt(0, boardLength ** 2)
+    //
+    //         let mod = boardLength
+    //         while (mod <= square) {
+    //             mod += boardLength
+    //         }
+    //         if (mod - square < ship.length) { // num is too far right on board, no space for ship
+    //             square -= ship.length - (mod - square)
+    //         }
+    //
+    //         coords.push(square)
+    //
+    //         for (let i = 1; i < ship.length; i++) {
+    //             const adjacent = square + i
+    //             coords.push(adjacent)
+    //         }
+    //     } else { // vertical
+    //         const square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+    //         coords.push(square)
+    //
+    //         for (let i = boardLength; i <= (ship.length - 1) * boardLength; i += boardLength) {
+    //             const adjacent = square + i
+    //             coords.push(adjacent)
+    //         }
+    //     }
+    //
+    //     return coords
+    // }
+
+    placeShips() { // generate a random placement for ships
+        const boardLength = this.board.length
+        let coords = []
+        let exhausted = false
+
+        for (let ship of this.ships) {
+            function randomInt(min, max) {
+                return Math.floor(Math.random() * (max - min)) + min;
+            }
+
+            let vertical, square
+            if (randomInt(0, 2) === 0) { // generate 50/50 chance
+                vertical = true
+
+                square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+                coords = this.generateVertical(square, ship)
+            } else {
+                vertical = false
+
+                square = randomInt(0, boardLength ** 2)
+                coords = this.generateHorizontal(square, ship)
+            }
+
+            while (this.place(coords) !== true) { // Try first orientation (i.e., vertical or horizontal). If didn't have room, try second. Still doesn't fit? Generate new square.
+                if (vertical && !exhausted) {
+                    exhausted = true
+                    vertical = false
+
+                    coords = this.generateHorizontal(square, ship)
+                } else if (!vertical && !exhausted) {
+                    exhausted = true
+                    vertical = true
+
+                    coords = this.generateVertical(square, ship)
+                } else {
+                    if (randomInt(0, 2) === 0) { // 50/50 chance to decide horizontal or vertical ship placement
+                        vertical = true
+                        exhausted = false
+
+                        square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+                        coords = this.generateVertical(square, ship)
+                    } else {
+                        vertical = false
+                        exhausted = false
+
+                        square = randomInt(0, boardLength ** 2)
+                        coords = this.generateHorizontal(square, ship)
+                    }
+                }
             }
         }
     }
