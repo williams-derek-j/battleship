@@ -23,16 +23,17 @@ export default class Gameboard {
     set renderDefense(callback) {
         if (callback !== null) {
             if (callback || callback === undefined) {
+                const boardLength = this.length
                 const board = document.createElement('div')
                 board.classList.add('board')
                 board.classList.add('defense')
 
-                for (let i = 0; i < this.length; i++) {
+                for (let i = 0; i < boardLength; i++) {
                     const row = document.createElement('div')
                     row.classList.add('row')
 
-                    for (let j = 0; j < this.length; j++) {
-                        const index = ((board.children.length * this.length) + row.children.length) // gives 0 - 63 or 0 - whatever board length ** 2 is
+                    for (let j = 0; j < boardLength; j++) {
+                        const index = ((board.children.length * boardLength) + row.children.length) // gives 0 - 63 or 0 - whatever board length ** 2 is
                         const value = this.defense[index] // value of square corresponding to render we are creating
 
                         const square = document.createElement('div')
@@ -67,11 +68,11 @@ export default class Gameboard {
                                 } else {
                                     if (!reversed) {
                                         for (let i = 0; i < length; i++) {
-                                            array.push(index + (i * this.length))
+                                            array.push(index + (i * boardLength))
                                         }
                                     } else {
                                         for (let i = length - 1; i >= 0; i--) {
-                                            array.push(index - (i * this.length))
+                                            array.push(index - (i * boardLength))
                                         }
                                     }
                                 }
@@ -103,11 +104,13 @@ export default class Gameboard {
                                             }
                                         }
                                     } else if (vertical === true) { // vertical
-                                        let mod = this.length // find index of square in row
-                                        while (mod <= array[0]) {
-                                            mod += this.length
-                                        }
-                                        const index = this.length - (mod - array[0])
+                                        let mod = array[0] - (array[0] % boardLength) // find index of square in row
+
+                                        // let mod = this.length // find index of square in row
+                                        // while (mod <= array[0]) {
+                                        //     mod += this.length
+                                        // }
+                                        const index = boardLength - (mod - array[0])
 
                                         if (reversed === false) { // V down, top to bottom
                                             for (let i = 1; i < array.length; i++) {
@@ -171,15 +174,16 @@ export default class Gameboard {
                     this._renderOffense = callback // callback is actually a reference to a DOM element
                 }
             } else {
+                const boardLength = this.length
                 const board = document.createElement('div')
                 board.classList.add('board')
                 board.classList.add('offense')
 
-                for (let i = 0; i < this.length; i++) {
+                for (let i = 0; i < boardLength; i++) {
                     const row = document.createElement('div')
 
-                    for (let j = 0; j < this.length; j++) {
-                        const index = ((board.children.length * this.length) + row.children.length)
+                    for (let j = 0; j < boardLength; j++) {
+                        const index = ((board.children.length * boardLength) + row.children.length)
                         const value = this.offense[index]
 
                         const square = document.createElement('div')
@@ -225,17 +229,18 @@ export default class Gameboard {
     }
 
     place(array) { // square is a decimal, 0 through board.length ** 2
+        const boardLength = this.length
         const board = this.defense
 
         let orientation
         for (let i = array.length - 1; i > 0; i--) {
-            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) / this.length !== 1) { // check if boat is disjointed, i.e., skips a square
+            if (array[i] - array[i - 1] !== 1 && (array[i] - array[i - 1]) / boardLength !== 1) { // check if boat is disjointed, i.e., skips a square
 
                 return false
             }
             if (array[i] - array[i - 1] === 1) {
                 orientation = 'horizontal'
-            } else if ((array[i] - array[i - 1]) % this.length === 0) {
+            } else if ((array[i] - array[i - 1]) % boardLength === 0) {
                 orientation = 'vertical'
             }
         }
@@ -256,11 +261,12 @@ export default class Gameboard {
         }
 
         if (orientation === 'horizontal') { // check to make sure horizontal boat doesn't wrap
-            let mod = this.length
+            let mod = (array[0] - (array[0] % boardLength) + boardLength) // find index of square in row
 
-            while (array[0] >= mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
-                mod += this.length
-            }
+            // let mod = this.length
+            // while (array[0] >= mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
+            //     mod += this.length
+            // }
 
             for (let square of array) {
                 if (square >= mod) {

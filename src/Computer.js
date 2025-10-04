@@ -41,10 +41,7 @@ export default class Computer extends Player {
                 for (let hit of hits) { // building adjacency list of contiguous hits
                     const adjacents = []
 
-                    let mod = 0
-                    while (mod <= hit) {
-                        mod += boardLength
-                    }
+                    let mod = hit - (hit % boardLength)
 
                     let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
                     let right = (hit + 1) < mod ? hit + 1 : null
@@ -100,11 +97,7 @@ export default class Computer extends Player {
 
                 if (horizontal.length >= vertical.length) {
                     let left = horizontal[0]
-
-                    let mod = boardLength
-                    while (mod <= left) {
-                        mod += boardLength
-                    }
+                    let mod = left - (left % boardLength)
                     let adjL = left - 1 >= mod - boardLength ? left - 1 : null // ternary check prevents wrapping
 
                     let right = horizontal[horizontal.length - 1]
@@ -143,10 +136,7 @@ export default class Computer extends Player {
             }
 
             if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
-                let mod = 0
-                while (mod <= hit) {
-                    mod += boardLength
-                }
+                let mod = hit - (hit % boardLength)
 
                 let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
                 let right = (hit + 1) < mod ? hit + 1 : null
@@ -248,11 +238,8 @@ export default class Computer extends Player {
         const boardLength = this.board.length
         const coords = []
 
-        let mod = boardLength
-        while (mod <= square) {
-            mod += boardLength
-        }
-        if (mod - square < ship.length) { // num is too far right on board, no space for ship
+        let mod = square - (square % boardLength)
+        if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
             square -= ship.length - (mod - square)
         }
 
@@ -280,49 +267,6 @@ export default class Computer extends Player {
         return coords
     }
 
-    // generateShip(ship) {
-    //     function randomInt(min, max) {
-    //         return Math.floor(Math.random() * (max - min) ) + min;
-    //     }
-    //
-    //     const boardLength = this.board.length
-    //     const coords = []
-    //     let vertical = false
-    //
-    //     if (randomInt(0, 2) === 0) { // generate 50/50 chance
-    //         vertical = true
-    //     }
-    //
-    //     if (!vertical) { // horizontal
-    //         let square = randomInt(0, boardLength ** 2)
-    //
-    //         let mod = boardLength
-    //         while (mod <= square) {
-    //             mod += boardLength
-    //         }
-    //         if (mod - square < ship.length) { // num is too far right on board, no space for ship
-    //             square -= ship.length - (mod - square)
-    //         }
-    //
-    //         coords.push(square)
-    //
-    //         for (let i = 1; i < ship.length; i++) {
-    //             const adjacent = square + i
-    //             coords.push(adjacent)
-    //         }
-    //     } else { // vertical
-    //         const square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
-    //         coords.push(square)
-    //
-    //         for (let i = boardLength; i <= (ship.length - 1) * boardLength; i += boardLength) {
-    //             const adjacent = square + i
-    //             coords.push(adjacent)
-    //         }
-    //     }
-    //
-    //     return coords
-    // }
-
     placeShips() { // generate a random placement for ships
         const boardLength = this.board.length
         let coords = []
@@ -337,12 +281,18 @@ export default class Computer extends Player {
             if (randomInt(0, 2) === 0) { // generate 50/50 chance
                 vertical = true
 
-                square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+                square = randomInt(0, (boardLength ** 2) - ((ship.length - 1) * boardLength))
                 coords = this.generateVertical(square, ship)
             } else {
                 vertical = false
 
                 square = randomInt(0, boardLength ** 2)
+
+                let mod = square - (square % boardLength)
+                if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
+                    square -= ship.length - (mod - square)
+                }
+
                 coords = this.generateHorizontal(square, ship)
             }
 
@@ -356,13 +306,18 @@ export default class Computer extends Player {
                     exhausted = true
                     vertical = true
 
+                    let mod = square - (square % boardLength)
+                    if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
+                        square -= ship.length - (mod - square)
+                    }
+
                     coords = this.generateVertical(square, ship)
                 } else {
                     if (randomInt(0, 2) === 0) { // 50/50 chance to decide horizontal or vertical ship placement
                         vertical = true
                         exhausted = false
 
-                        square = randomInt(0, (boardLength ** 2) - (ship.length - 1 * boardLength))
+                        square = randomInt(0, (boardLength ** 2) - ((ship.length - 1) * boardLength))
                         coords = this.generateVertical(square, ship)
                     } else {
                         vertical = false
