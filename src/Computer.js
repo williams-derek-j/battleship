@@ -240,7 +240,7 @@ export default class Computer extends Player {
 
         let mod = square - (square % boardLength)
         if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
-            square -= ship.length - (mod - square)
+            square -= ship.length - ((mod + boardLength) - square)
         }
 
         coords.push(square)

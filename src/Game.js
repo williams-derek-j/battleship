@@ -60,15 +60,15 @@ export default class Game {
             } else {
                 this.events.on('Attack', (square) => {
                     let boardLength = player.board.length
-                    // let mod = square - (square % boardLength)
-                    let mod = length
-
-                    let row = 0 // index of row
-                    while (mod <= square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
-                        mod += length
-                        row++
-                    }
-                    // const row = (boardLength - 1) - ((boardLength * (boardLength - 1)) - mod)
+                    let mod = square - (square % boardLength)
+                    // let mod = length
+                    //
+                    // let row = 0 // index of row
+                    // while (mod <= square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
+                    //     mod += length
+                    //     row++
+                    // }
+                    const row = (boardLength - 1) - ((boardLength * (boardLength - 1)) - mod)
                     const column = boardLength - (mod - square)
 
                     const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
