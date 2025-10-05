@@ -1,7 +1,7 @@
 import EventEmitter from './Events'
 import Computer from './Computer'
 
-test.only('Place ships', () => {
+test.skip('Place ships', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP)

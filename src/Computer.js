@@ -41,7 +41,7 @@ export default class Computer extends Player {
                 for (let hit of hits) { // building adjacency list of contiguous hits
                     const adjacents = []
 
-                    let mod = hit - (hit % boardLength)
+                    let mod = (hit - (hit % boardLength)) + boardLength
 
                     let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
                     let right = (hit + 1) < mod ? hit + 1 : null
@@ -97,7 +97,7 @@ export default class Computer extends Player {
 
                 if (horizontal.length >= vertical.length) {
                     let left = horizontal[0]
-                    let mod = left - (left % boardLength)
+                    let mod = (left - (left % boardLength)) + boardLength
                     let adjL = left - 1 >= mod - boardLength ? left - 1 : null // ternary check prevents wrapping
 
                     let right = horizontal[horizontal.length - 1]
@@ -136,7 +136,7 @@ export default class Computer extends Player {
             }
 
             if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
-                let mod = hit - (hit % boardLength)
+                let mod = (hit - (hit % boardLength)) + boardLength
 
                 let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
                 let right = (hit + 1) < mod ? hit + 1 : null
