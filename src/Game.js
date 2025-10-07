@@ -6,7 +6,7 @@ export default class Game {
         if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
-        while (settings.shipsPerPlayer !== settings.shipLengths.length) {
+        while (settings.shipsPerPlayer !== settings.shipLengths.length) { // 3,4,5 with shipsPerPlayer: 4 results in 3,4,5,3
             settings.shipLengths.forEach(length => {
                 settings.shipLengths.push(length)
             })
@@ -48,7 +48,7 @@ export default class Game {
         console.log('***************pl', this.turn, this, this.events)
 
         if (this.survivors.length > 1) {
-            let render
+            let render // why is this here?
             const player = this.survivors[this.turn - 1]
             console.log('player',player)
 
@@ -57,47 +57,57 @@ export default class Game {
                     this.turn += 1
                     setTimeout(this.play.bind(this), 2000)
                 })
+
+                if (player.isReal === false) {
+                    player.placeShips()
+                }
             } else {
-                this.events.on('Attack', (square) => {
-                    let boardLength = player.board.length
-                    let mod = square - (square % boardLength)
-                    // let mod = length
-                    //
-                    // let row = 0 // index of row
-                    // while (mod <= square) { // board length of 8 * row >= victim square? must be second row -- first row: [0,1,2,3,4,5,6,7]
-                    //     mod += length
-                    //     row++
-                    // }
-                    const row = (boardLength - 1) - ((boardLength * (boardLength - 1)) - mod)
-                    const column = boardLength - (mod - square)
+                if (player.isReal === true) {
+                    this.events.on('Attack', (square) => {
+                        let boardLength = player.board.length
+                        let mod = square - (square % boardLength)
 
-                    const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
+                        const row = (boardLength - 1) - ((boardLength * (boardLength - 1)) - mod)
+                        const column = boardLength - (mod - square)
 
-                    const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
+                        const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
 
-                    if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
-                        render.classList.add('hit')
-                        render.classList.add(`q${result}`) // 1+ hits
-                    } else {
-                        render.classList.add('miss')
-                    }
+                        const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
 
-                    this.turn += 1
+                        if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
+                            render.classList.add('hit')
+                            render.classList.add(`q${result}`) // 1+ hits
+                        } else {
+                            render.classList.add('miss')
+                        }
 
-                    setTimeout(this.play.bind(this), 2000)
-                })
+                        this.turn += 1
+
+                        setTimeout(this.play.bind(this), 2000)
+                    })
+                } else if (player.isReal === false) {
+                    this.events.on('Attack', (square) => {
+                        this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
+
+                        this.turn += 1
+                    })
+
+                    player.generateAttack()
+                }
             }
 
-            player.render = undefined // create render
-            render = player.render
+            if (player.isReal === true) {
+                player.render = undefined // create render (by setting to undefined)
+                render = player.render
 
-            while (this.container.firstChild) {
-                console.log('clearing container')
-                this.container.removeChild(this.container.lastChild)
+                while (this.container.firstChild) {
+                    console.log('clearing container')
+                    this.container.removeChild(this.container.lastChild)
+                }
+
+                this.container.textContent = `PLAYER ${player.id}`
+                this.container.appendChild(render)
             }
-
-            this.container.textContent = `PLAYER ${player.id}`
-            this.container.appendChild(render)
         } else {
             return false // only 1 player
         }
