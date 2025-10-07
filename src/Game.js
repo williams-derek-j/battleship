@@ -28,7 +28,7 @@ export default class Game {
             this.players.push(player)
         }
 
-        this._turn = 1
+        this._turn = -1
     }
 
     set turn(val) {
@@ -43,71 +43,146 @@ export default class Game {
         return this._turn
     }
 
+    renderInit() {
+        const render = document.createElement('div')
+        render.classList.add('gameSettings')
+
+        const form = document.createElement('form')
+
+        const playerCount = document.createElement('input')
+        playerCount.required = true
+        playerCount.type = 'range'
+        playerCount.value = '2'
+        playerCount.min = '1'
+        playerCount.max = '2'
+
+        const boardLength = document.createElement('input')
+        boardLength.required = true
+        boardLength.type = 'range'
+        boardLength.value = '8'
+        boardLength.min = '2'
+        boardLength.max = '12'
+
+        const shipsPerPlayer = document.createElement('input')
+        shipsPerPlayer.required = true
+        shipsPerPlayer.type = 'range'
+        shipsPerPlayer.value = '4'
+        shipsPerPlayer.min = '1'
+        shipsPerPlayer.max = '8'
+
+        const shipLengths = document.createElement('div')
+        shipLengths.classList.add('shipLengths')
+
+        const ships = []
+        for (let i = 1; i <= boardLength.max; i++) {
+            ships.push(i)
+        }
+
+        ships.forEach((ship) => {
+            const container = document.createElement('div')
+
+            const label = document.createElement('label')
+            label.textContent = `${ship}:`
+
+            const check = document.createElement('input')
+            check.type = 'checkbox'
+            check.checked = true
+
+            container.appendChild(label)
+            container.appendChild(check)
+
+            shipLengths.appendChild(container)
+        })
+
+        const submit = document.createElement('button')
+
+        form.appendChild(playerCount)
+        form.appendChild(boardLength)
+        form.appendChild(shipsPerPlayer)
+        form.appendChild(shipLengths)
+        form.appendChild(submit)
+
+        render.appendChild(form)
+
+        // boardLength.addEventListener('change', (event) => {
+        //
+        // })
+
+        return render
+    }
+
     play() {
         this.events.events = {}
         console.log('***************pl', this.turn, this, this.events)
 
         if (this.survivors.length > 1) {
-            let render // why is this here?
-            const player = this.survivors[this.turn - 1]
-            console.log('player',player)
+            if (this.turn === -1) {
+                const render = this.renderInit()
 
-            if (player.allShipsPlaced === false) {
-                this.events.on('All ships placed', () => {
-                    this.turn += 1
-                    setTimeout(this.play.bind(this), 2000)
-                })
-
-                if (player.isReal === false) {
-                    player.placeShips()
-                }
-            } else {
-                if (player.isReal === true) {
-                    this.events.on('Attack', (square) => {
-                        let boardLength = player.board.length
-                        let mod = square - (square % boardLength)
-                        const lastMod = boardLength * (boardLength - 1)
-
-                        const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
-                        const column = square - mod
-
-                        const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
-
-                        const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
-
-                        if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
-                            render.classList.add('hit')
-                            render.classList.add(`q${result}`) // 1+ hits
-                        } else {
-                            render.classList.add('miss')
-                        }
-
-                        this.turn += 1
-
-                        setTimeout(this.play.bind(this), 2000)
-                    })
-                } else if (player.isReal === false) {
-                    this.events.on('Attack', (square) => {
-                        this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
-
-                        this.turn += 1
-                    })
-
-                    player.generateAttack()
-                }
-            }
-
-            if (player.isReal === true) {
-                player.render = undefined // create render (by setting to undefined)
-                render = player.render
-
-                while (this.container.firstChild) {
-                    console.log('clearing container')
-                    this.container.removeChild(this.container.lastChild)
-                }
-
-                this.container.textContent = `PLAYER ${player.id}`
+                this.container.textContent = `NEW GAME`
                 this.container.appendChild(render)
+            } else {
+                let render // why is this here?
+                const player = this.survivors[this.turn - 1]
+                console.log('player',player)
+
+                if (player.allShipsPlaced === false) {
+                    this.events.on('All ships placed', () => {
+                        this.turn += 1
+                        setTimeout(this.play.bind(this), 1000)
+                    })
+
+                    if (player.isReal === false) {
+                        player.placeShips()
+                    }
+                } else {
+                    if (player.isReal === true) {
+                        this.events.on('Attack', (square) => {
+                            let boardLength = player.board.length
+                            let mod = square - (square % boardLength)
+                            const lastMod = boardLength * (boardLength - 1)
+
+                            const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
+                            const column = square - mod
+
+                            const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
+
+                            const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
+
+                            if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
+                                render.classList.add('hit')
+                                render.classList.add(`q${result}`) // 1+ hits
+                            } else {
+                                render.classList.add('miss')
+                            }
+
+                            this.turn += 1
+
+                            setTimeout(this.play.bind(this), 1000)
+                        })
+                    } else if (player.isReal === false) {
+                        this.events.on('Attack', (square) => {
+                            this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
+
+                            this.turn += 1
+                        })
+
+                        player.generateAttack()
+                    }
+                }
+
+                if (player.isReal === true) {
+                    player.render = undefined // create render (by setting to undefined)
+                    render = player.render
+
+                    while (this.container.firstChild) {
+                        console.log('clearing container')
+                        this.container.removeChild(this.container.lastChild)
+                    }
+
+                    this.container.textContent = `PLAYER ${player.id}`
+                    this.container.appendChild(render)
+                }
             }
         } else {
             return false // only 1 player
