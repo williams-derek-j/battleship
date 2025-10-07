@@ -6,11 +6,11 @@ export default class Game {
         if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
-        while (settings.shipsPerPlayer !== settings.shipLengths.length) { // 3,4,5 with shipsPerPlayer: 4 results in 3,4,5,3
-            settings.shipLengths.forEach(length => {
-                settings.shipLengths.push(length)
-            })
-        }
+        // while (settings.shipsPerPlayer !== settings.shipLengths.length) { // 3,4,5 with shipsPerPlayer: 4 results in 3,4,5,3
+        //     settings.shipLengths.forEach(length => {
+        //         settings.shipLengths.push(length)
+        //     })
+        // }
         this.container = container
         this.events = new EventEmitter()
 
@@ -66,9 +66,10 @@ export default class Game {
                     this.events.on('Attack', (square) => {
                         let boardLength = player.board.length
                         let mod = square - (square % boardLength)
+                        const lastMod = boardLength * (boardLength - 1)
 
-                        const row = (boardLength - 1) - ((boardLength * (boardLength - 1)) - mod)
-                        const column = boardLength - (mod - square)
+                        const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
+                        const column = square - mod
 
                         const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
 
