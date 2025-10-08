@@ -113,9 +113,12 @@ export default class Gameboard {
                                         const index = boardLength - (mod - array[0])
 
                                         if (reversed === false) { // V down, top to bottom
-                                            for (let i = 1; i < array.length; i++) {
+                                            for (let i = 1; i < array.length; i++) { // starts at 1 because we are filling squares adjacent to the square we've dropped our ship on, e.g., if 5 then 6, 7, 8 for ship length of 4
+                                                console.log(i)
+                                                console.log(current)
                                                 let next = current.parentElement.nextElementSibling.children[index]
 
+                                                console.log(next)
                                                 next.classList.add('occupied')
 
                                                 current = next

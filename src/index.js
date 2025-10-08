@@ -10,7 +10,8 @@ const events = new EventEmitter()
 const body = document.querySelector('body')
 
 const settings = new InitGame(body, events)
-events.on('settings submitted', function createGame(settings) {
+events.on('settings submitted', (settings)=> {
+    console.log('settings submitted', settings)
     const game = new Game(body, settings)
 
     game.play()

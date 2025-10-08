@@ -57,8 +57,12 @@ export default class InitGame {
         const submit = document.createElement('button')
         submit.textContent = 'Submit'
         submit.addEventListener('click', (event) => {
+            event.preventDefault()
+
             let settings = {}
             let valid = true
+
+            const shipLengths = []
 
             const inputs = form.querySelectorAll('input')
             inputs.forEach((input) => {
@@ -71,8 +75,11 @@ export default class InitGame {
                         const settingName = input.className
                         settings[settingName] = input.value
                     }
+                } else {
+                    shipLengths.push(Number(input.value))
                 }
             })
+            settings['shipLengths'] = shipLengths
 
             if (valid) {
                 emitter.emit('settings submitted', settings);
