@@ -1,8 +1,8 @@
-import EventEmitter from "./events";
+import EventEmitter from "./events"
 import Player from './Player'
 
 export default class Game {
-    constructor(container, settings = { players: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
+    constructor(container, settings = { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
         if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }
@@ -16,7 +16,7 @@ export default class Game {
 
         this.players = []
         this.survivors = []
-        for (let i = 1; i <= settings.players; i++) {
+        for (let i = 1; i <= settings.playerCount; i++) {
             const player = new Player(i, this.events, settings, `Player${i}`);
 
             player.events.on('Hit received', this.sendHit.bind(this))
@@ -117,10 +117,14 @@ export default class Game {
 
         if (this.survivors.length > 1) {
             if (this.turn === -1) {
-                const render = this.renderInit()
-
-                this.container.textContent = `NEW GAME`
-                this.container.appendChild(render)
+                // const render = this.renderInit()
+                //
+                // this.container.textContent = `NEW GAME`
+                // this.container.appendChild(render)
+                //
+                // this.events.on('settings submitted', {
+                //
+                // })
             } else {
                 let render // why is this here?
                 const player = this.survivors[this.turn - 1]
