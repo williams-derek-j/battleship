@@ -9,6 +9,7 @@ export default class Player {
         this.defeated = false
         this.isReal = true
 
+        console.log('gs in player',gameSettings)
         this.board = new Gameboard(gameSettings.boardLength);
         this._render = null
         this.events = new EventEmitter()

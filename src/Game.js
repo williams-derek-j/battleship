@@ -3,6 +3,7 @@ import Player from './Player'
 
 export default class Game {
     constructor(container, settings = { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
+        console.log('gs in game', settings)
         if (Object.keys(settings).length !== 4) {
             throw Error('Missing one or more required game settings!')
         }

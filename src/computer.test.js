@@ -4,7 +4,7 @@ import Computer from './Computer'
 test.only('Place ships', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
 
     const listener = jest.fn()
     comp.eventsP.on("All ships placed", listener)
