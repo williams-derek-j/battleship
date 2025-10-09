@@ -1,5 +1,6 @@
 import EventEmitter from "./events"
 import Player from './Player'
+import Computer from './Computer'
 
 export default class Game {
     constructor(container, settings = { playerCount: 2, boardLength: 8, shipLengths: [3,4,5,6] }) {
@@ -23,6 +24,17 @@ export default class Game {
 
             this.survivors.push(player)
             this.players.push(player)
+        }
+        if (settings.playerCount === 1) {
+            const computer = new Computer(2, this.events, settings)
+
+            computer.events.on('Hit received', this.sendHit.bind(this))
+            computer.events.on('Miss received', this.sendMiss.bind(this))
+            computer.events.on('Sunk', this.sendSink.bind(this))
+            computer.events.on('Defeated', this.sendDefeat.bind(this))
+
+            this.survivors.push(computer)
+            this.players.push(computer)
         }
 
         this._turn = 1
@@ -87,7 +99,11 @@ export default class Game {
                     this.events.on('Attack', (square) => {
                         this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
 
-                        this.turn += 1
+                        this.turn = 1
+
+                        console.log('arrived', this.turn)
+                        this.play.bind(this)()
+                        console.log('arrived2', this.turn)
                     })
 
                     player.generateAttack()
@@ -95,13 +111,13 @@ export default class Game {
             }
 
             if (player.isReal === true) {
-                player.render = undefined // create render (by setting to undefined)
-                render = player.render
-
                 while (this.container.firstChild) {
                     console.log('clearing container')
                     this.container.removeChild(this.container.lastChild)
                 }
+
+                player.render = undefined // create render (by setting to undefined)
+                render = player.render
 
                 this.container.textContent = `PLAYER ${player.id}`
                 this.container.appendChild(render)

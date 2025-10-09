@@ -123,7 +123,7 @@ export default class InitGame {
             label.textContent = `${length}:`
             label.htmlFor = `check${length}`
 
-            if (check.value >= 3 && check.value <= 6) {
+            if (check.value >= 3 && check.value <= 3) {
                 check.checked = true
             }
 
