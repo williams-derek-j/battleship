@@ -136,7 +136,6 @@ export default class InitGame {
                     if (!shipsActive.some(ship => ship.value === value )) {
                         shipsActive.push({ value: value, quantity: Number(quantity.value) })
                     }
-                    console.log('shipsActive', shipsActive)
 
                     if (value > Number(boardLength.value)) {
                         check.setCustomValidity("Cannot have ships longer than board length!")
@@ -150,14 +149,13 @@ export default class InitGame {
                         let totalSquares = 0
                         let totalShips = 0
                         shipsActive.forEach((ship) => {
-                            totalShips++
+                            totalShips += ship.quantity
 
                             const squares = ship.value * ship.quantity
 
                             totalSquares += squares
                         })
                         const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
-                        console.log('here0', Math.round(totalSquares / boardSize), totalSquares, boardSize, Math.round((totalSquares / boardSize) * 100))
 
                         if (percentOccupied > .50) {
                             occupancyCounterContainer.classList.add('invalid')
@@ -193,21 +191,19 @@ export default class InitGame {
                     let totalSquares = 0
                     let totalShips = 0
                     shipsActive.forEach((ship) => {
-                        totalShips++
+                        totalShips += ship.quantity
 
                         const squares = ship.value * ship.quantity
 
                         totalSquares += squares
                     })
                     const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
-                    console.log(percentOccupied)
 
                     if (percentOccupied < .50) {
                         if (occupancyCounterContainer.classList.contains('invalid')) {
                             occupancyCounterContainer.classList.remove('invalid')
                         }
                     }
-                    console.log(percentOccupied)
                     occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
                     shipsCounter.textContent = totalShips.toString()
                 }
@@ -226,7 +222,6 @@ export default class InitGame {
             quantity.min = '1'
             quantity.max = '8'
             quantity.addEventListener('change', (event) => {
-                console.log('?')
                 quantityCounter.textContent = `#: ${quantity.value}`
 
                 if (check.checked) {
@@ -236,7 +231,7 @@ export default class InitGame {
                     let totalSquares = 0
                     let totalShips = 0
                     shipsActive.forEach((ship) => {
-                        totalShips++
+                        totalShips += ship.quantity
 
                         const squares = ship.value * ship.quantity
 
@@ -409,38 +404,6 @@ export default class InitGame {
 
             boardLength.reportValidity();
         })
-
-        // shipsPerPlayer.addEventListener('change', (event) => { // will only need this as a last resort
-        //     console.log('spp change', event)
-        //     event.preventDefault()
-        //     shipsPerPlayer.setCustomValidity("")
-        //     if (shipsPerPlayer.parentElement.classList.contains('invalid')) {
-        //         shipsPerPlayer.parentElement.classList.remove('invalid') // parentElement is its div input container
-        //     }
-        //
-        //     let totalShips = 0
-        //     const quantities = []
-        //     const checks = shipLengths.querySelectorAll('input')
-        //     checks.forEach((check, index) => {
-        //         if (check.checked) {
-        //             quantities.push(checks[index + 1].value)
-        //         }
-        //     })
-        //     console.log('qs', quantities)
-        //     for (const quantity of quantities) {
-        //         totalShips += quantity
-        //     }
-        //
-        //     console.log('here', shipsPerPlayer, shipsPerPlayer.value, totalShips)
-        //     if (Number(shipsPerPlayer.value) < totalShips) {
-        //         shipsPerPlayer.setCustomValidity("Ships per player is less than selected number of ships!")
-        //         shipsPerPlayer.parentElement.classList.add('invalid')
-        //     } else if (Number(shipsPerPlayer.value) > totalShips) {
-        //         shipsPerPlayer.setCustomValidity('Ships per player is more than selected number of ships!')
-        //         shipsPerPlayer.parentElement.classList.add('invalid')
-        //     }
-        //     shipsPerPlayer.reportValidity()
-        // })
 
         container.appendChild(render)
     }
