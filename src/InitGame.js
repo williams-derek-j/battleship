@@ -135,6 +135,12 @@ export default class InitGame {
 
                     if (!shipsActive.some(ship => ship.value === value )) {
                         shipsActive.push({ value: value, quantity: Number(quantity.value) })
+                    } else {
+                        throw Error("Couldn't app ship to shipsActive! Already contained ship.")
+                    }
+
+                    if (squareCounterContainer.classList.contains('invalid')) { // squareCounter gets invalid class when it hits 0 squares occupied
+                        squareCounterContainer.classList.remove('invalid')
                     }
 
                     if (value > Number(boardLength.value)) {
@@ -143,8 +149,6 @@ export default class InitGame {
                         check.checked = false
                     } else {
                         const squaresAdded = value * Number(quantity.value)
-
-                        squareCounter.textContent = (Number(squareCounter.textContent) + squaresAdded).toString()
 
                         let totalSquares = 0
                         let totalShips = 0
@@ -162,6 +166,7 @@ export default class InitGame {
                         }
                         occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
                         shipsCounter.textContent = totalShips.toString()
+                        squareCounter.textContent = (Number(squareCounter.textContent) + squaresAdded).toString()
                     }
                     check.reportValidity()
                 } else { // uncheck
@@ -180,13 +185,20 @@ export default class InitGame {
 
                     if (found === undefined) {
                         throw Error(`Unable to find and remove ship ${found} in shipsActive array!`)
-                    } else {
-                        shipsActive.splice(foundIndex, 1)
+                    }
+
+                    shipsActive.splice(foundIndex, 1)
+
+                    if (blContainer.classList.contains('invalid')) {
+                        if (!shipsActive.some(ship => ship.value > boardLength)) {
+                            blContainer.classList.remove('invalid')
+
+                            boardLength.setCustomValidity("")
+                            boardLength.reportValidity()
+                        }
                     }
 
                     const squaresRemoved = value * (quantity.value)
-
-                    squareCounter.textContent = (Number(squareCounter.textContent) - squaresRemoved).toString()
 
                     let totalSquares = 0
                     let totalShips = 0
@@ -199,13 +211,19 @@ export default class InitGame {
                     })
                     const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
-                    if (percentOccupied < .50) {
+                    if (percentOccupied < .50001) {
                         if (occupancyCounterContainer.classList.contains('invalid')) {
                             occupancyCounterContainer.classList.remove('invalid')
                         }
                     }
+                    if (percentOccupied < .00001) {
+                        if (!squareCounterContainer.classList.contains('invalid')) {
+                            squareCounterContainer.classList.add('invalid')
+                        }
+                    }
                     occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
                     shipsCounter.textContent = totalShips.toString()
+                    squareCounter.textContent = (Number(squareCounter.textContent) - squaresRemoved).toString()
                 }
             })
 
@@ -278,16 +296,12 @@ export default class InitGame {
             const inputs = form.querySelectorAll('input')
             inputs.forEach((input) => {
                 if (input.type === 'range') {
-                    console.log('rangeinputs', input)
-
                     if (!input.validity.valid) {
-                        console.log('invalid sn', input)
                         input.reportValidity()
 
                         valid = false
                     } else {
                         if (!input.className.includes('ship quantity')) {
-                            console.log('valid sn', input)
                             const settingName = input.className
                             settings[settingName] = Number(input.value)
                         }
@@ -301,26 +315,34 @@ export default class InitGame {
                         }
                     }
                 }
-
-                let totalSquares = 0
-                shipLengths.forEach(ship => {
-                    totalSquares += ship
-                })
-
-                if (totalSquares > boardSize / 2) {
-                    valid = false
-
-                    if (!occupancyCounterContainer.classList.contains('invalid')) {
-                        occupancyCounterContainer.classList.add('invalid')
-                    }
-                } else {
-                    if (occupancyCounterContainer.classList.contains('invalid')) {
-                        occupancyCounterContainer.classList.remove('invalid')
-                    }
-                }
             })
+            let totalSquares = 0
+            shipLengths.forEach(ship => {
+                totalSquares += ship
+            })
+
+            if (totalSquares > boardSize / 2) {
+                valid = false
+
+                if (!occupancyCounterContainer.classList.contains('invalid')) {
+                    occupancyCounterContainer.classList.add('invalid')
+                }
+            } else if (totalSquares === 0) {
+                valid = false
+
+                if (!squareCounterContainer.classList.contains('invalid')) {
+                    squareCounterContainer.classList.add('invalid')
+                }
+            } else {
+                if (occupancyCounterContainer.classList.contains('invalid')) {
+                    occupancyCounterContainer.classList.remove('invalid')
+                }
+                if (squareCounterContainer.classList.contains('invalid')) {
+                    squareCounterContainer.classList.remove('invalid')
+                }
+            }
+
             settings['shipLengths'] = shipLengths
-            console.log(settings['shipLengths'])
 
             if (valid) {
                 console.log('****************************form valid')

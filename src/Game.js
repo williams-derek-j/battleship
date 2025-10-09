@@ -42,7 +42,7 @@ export default class Game {
 
     play() {
         this.events.events = {}
-        console.log('***************pl', this.turn, this, this.events)
+        console.log('*************************************************************pl', this.turn, this, this.events)
 
         if (this.survivors.length > 1) {
             let render // why is this all the way up here?
