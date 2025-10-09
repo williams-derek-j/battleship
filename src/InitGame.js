@@ -103,16 +103,33 @@ export default class InitGame {
         ships.forEach((ship) => {
             const container = document.createElement('div')
 
-            const label = document.createElement('label')
-            label.textContent = `${ship}:`
-
             const check = document.createElement('input')
             check.type = 'checkbox'
             check.value = ship
+            check.id = `check${ship}`
+
+            const label = document.createElement('label')
+            label.textContent = `${ship}:`
+            label.htmlFor = `check${ship}`
 
             if (check.value >= 3 && check.value <= 6) {
                 check.checked = true
             }
+
+            check.addEventListener('click', () => {
+                if (check.checked) {
+                    check.setCustomValidity("")
+
+                    if (Number(check.value) > Number(boardLength.value)) {
+                        console.log('should be invalid', check.validity)
+                        check.setCustomValidity("Cannot have ships longer than board length!")
+                    }
+                    check.reportValidity()
+                } else {
+                    check.setCustomValidity("")
+                    check.reportValidity()
+                }
+            })
 
             container.appendChild(label)
             container.appendChild(check)
@@ -141,11 +158,30 @@ export default class InitGame {
                         const settingName = input.className
                         settings[settingName] = Number(input.value)
                     }
-                } else {
-                    shipLengths.push(Number(input.value))
+                } else if (input.type === 'checkbox') {
+                    if (!input.validity.valid) {
+                        input.reportValidity()
+
+                        valid = false
+
+                        if (shipLengths.includes(input.value)) {
+                            let i = 0
+                            for (const ship of shipLengths) {
+                                if (ship.value === input.value) {
+                                    shipLengths.splice(i, 1)
+                                }
+                                i++
+                            }
+                        }
+                    } else {
+                        if (input.checked) {
+                            shipLengths.push(Number(input.value))
+                        }
+                    }
                 }
             })
             settings['shipLengths'] = shipLengths
+            console.log(settings['shipLengths'])
 
             if (valid) {
                 emitter.emit('settings submitted', settings);
@@ -179,6 +215,9 @@ export default class InitGame {
         boardLength.addEventListener('change', (event) => {
             event.preventDefault(); // dunno if necessary
             boardLength.setCustomValidity("")
+            if (boardLength.parentElement.classList.contains('invalid')) {
+                boardLength.parentElement.classList.remove('invalid') // parentElement is its div container
+            }
 
             const checks = shipLengths.querySelectorAll('input')
             const checked = []
@@ -189,7 +228,9 @@ export default class InitGame {
             })
             for (const ship of checked) {
                 if (ship > event.target.value) {
-                    boardLength.setCustomValidity('Length of board must be equal to or greater than longest ship!')
+                    boardLength.setCustomValidity("Length of board must be equal to or greater than longest ship!")
+
+                    boardLength.parentElement.classList.add('invalid') // parentElement is its div container
                     break
                 }
             }
