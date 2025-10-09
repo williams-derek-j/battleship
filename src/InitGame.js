@@ -20,8 +20,6 @@ export default class InitGame {
         pcInputContainer.style.flexDirection = 'row'
         pcInputContainer.style.justifyContent = 'space-between'
 
-        const pcCounter = document.createElement('span')
-
         const playerCount = document.createElement('input')
         playerCount.id = 'playerCount'
         playerCount.classList.add('playerCount')
@@ -30,8 +28,9 @@ export default class InitGame {
         playerCount.value = '2'
         playerCount.min = '1'
         playerCount.max = '2'
-        playerCount.oninput = () => {playerCount.previousElementSibling.textContent = playerCount.value}
+        playerCount.oninput = () => { playerCount.previousElementSibling.textContent = playerCount.value }
 
+        const pcCounter = document.createElement('span')
         pcCounter.textContent = playerCount.value
 
         const blContainer = document.createElement('div')
@@ -49,8 +48,6 @@ export default class InitGame {
         blInputContainer.style.flexDirection = 'row'
         blInputContainer.style.justifyContent = 'space-between'
 
-        const blCounter = document.createElement('span')
-
         const boardLength = document.createElement('input')
         boardLength.id = 'boardLength'
         boardLength.classList.add('boardLength')
@@ -59,8 +56,9 @@ export default class InitGame {
         boardLength.value = '8'
         boardLength.min = '2'
         boardLength.max = '12'
-        boardLength.oninput = () => {boardLength.previousElementSibling.textContent = boardLength.value}
+        boardLength.oninput = () => { boardLength.previousElementSibling.textContent = boardLength.value }
 
+        const blCounter = document.createElement('span')
         blCounter.textContent = boardLength.value
 
         const sppContainer = document.createElement('div')
@@ -78,8 +76,6 @@ export default class InitGame {
         sppInputContainer.style.flexDirection = 'row'
         sppInputContainer.style.justifyContent = 'space-between'
 
-        const sppCounter = document.createElement('span')
-
         const shipsPerPlayer = document.createElement('input')
         shipsPerPlayer.id = 'shipsPerPlayer'
         shipsPerPlayer.classList.add('shipsPerPlayer')
@@ -88,8 +84,9 @@ export default class InitGame {
         shipsPerPlayer.value = '4'
         shipsPerPlayer.min = '1'
         shipsPerPlayer.max = '8'
-        shipsPerPlayer.oninput = () => {shipsPerPlayer.previousElementSibling.textContent = shipsPerPlayer.value}
+        shipsPerPlayer.oninput = () => { shipsPerPlayer.previousElementSibling.textContent = shipsPerPlayer.value }
 
+        const sppCounter = document.createElement('span')
         sppCounter.textContent = shipsPerPlayer.value
 
         const shipLengths = document.createElement('div')
@@ -121,7 +118,6 @@ export default class InitGame {
                     check.setCustomValidity("")
 
                     if (Number(check.value) > Number(boardLength.value)) {
-                        console.log('should be invalid', check.validity)
                         check.setCustomValidity("Cannot have ships longer than board length!")
                     }
                     check.reportValidity()
@@ -131,8 +127,29 @@ export default class InitGame {
                 }
             })
 
+            const quantityContainer = document.createElement('div')
+            quantityContainer.style.display = 'flex'
+            quantityContainer.style.flexDirection = 'row'
+            quantityContainer.style.justifyContent = 'space-between'
+
+            const quantity = document.createElement('input')
+            quantity.id = `quantity${ship}`
+            quantity.classList.add('ship','quantity')
+            quantity.type = 'range'
+            quantity.value = '1'
+            quantity.min = '1'
+            quantity.max = shipsPerPlayer.max
+            quantity.oninput = () => { quantity.previousElementSibling.textContent = quantity.value }
+
+            const quantityCounter = document.createElement('span')
+            quantityCounter.textContent = quantity.value
+
+            quantityContainer.appendChild(quantityCounter)
+            quantityContainer.appendChild(quantity)
+
             container.appendChild(label)
             container.appendChild(check)
+            container.appendChild(quantityContainer)
 
             shipLengths.appendChild(container)
         })
@@ -150,13 +167,18 @@ export default class InitGame {
             const inputs = form.querySelectorAll('input')
             inputs.forEach((input) => {
                 if (input.type === 'range') {
+                    console.log('rangeinputs', input)
                     if (!input.validity.valid) {
+                        console.log('invalid sn', input)
                         input.reportValidity()
 
                         valid = false
                     } else {
-                        const settingName = input.className
-                        settings[settingName] = Number(input.value)
+                        if (!input.className.includes('ship quantity')) {
+                            console.log('valid sn', input)
+                            const settingName = input.className
+                            settings[settingName] = Number(input.value)
+                        }
                     }
                 } else if (input.type === 'checkbox') {
                     if (!input.validity.valid) {
@@ -175,7 +197,28 @@ export default class InitGame {
                         }
                     } else {
                         if (input.checked) {
-                            shipLengths.push(Number(input.value))
+                            const quantity = form.querySelector(`#quantity${input.value}`)
+                            shipsPerPlayer.setCustomValidity("")
+                            if (shipsPerPlayer.parentElement.classList.contains('invalid')) {
+                                shipsPerPlayer.parentElement.classList.remove('invalid') // parentElement is its div input container
+                            }
+
+                            for (let i = 0; i < quantity.value; i++) {
+                                shipLengths.push(Number(input.value))
+                            }
+
+                            if (shipLengths.length > Number(shipsPerPlayer.value)) {
+                                shipsPerPlayer.setCustomValidity("Ships per player is less than selected number of ships!")
+                                shipsPerPlayer.parentElement.classList.add('invalid') // parentElement is its div input container
+                                valid = false
+                            } else if (shipLengths.length < Number(shipsPerPlayer.value)) {
+                                shipsPerPlayer.setCustomValidity("Ships per play is more than selected number of ships!")
+                                shipsPerPlayer.parentElement.classList.add('invalid') // parentElement is its div input container
+                                valid = false
+                            } else {
+                                valid = true // need this otherwise the ships pushed to shipLengths makes the shipLengths input invalid, need something to mark it valid once shipLengths === shipsPerPlayer, if it exceeds it'll get marked invalid again
+                            }
+                            shipsPerPlayer.reportValidity()
                         }
                     }
                 }
@@ -184,7 +227,10 @@ export default class InitGame {
             console.log(settings['shipLengths'])
 
             if (valid) {
+                console.log('****************************form valid')
                 emitter.emit('settings submitted', settings);
+            } else {
+                console.log('****************************form invalid')
             }
         })
 
@@ -230,7 +276,7 @@ export default class InitGame {
                 if (ship > event.target.value) {
                     boardLength.setCustomValidity("Length of board must be equal to or greater than longest ship!")
 
-                    boardLength.parentElement.classList.add('invalid') // parentElement is its div container
+                    boardLength.parentElement.classList.add('invalid') // parentElement is its div input container
                     break
                 }
             }
@@ -238,22 +284,37 @@ export default class InitGame {
             boardLength.reportValidity();
         })
 
-        // shipsPerPlayer.addEventListener('change', (event) => { // will only need this as a last resort
-        //     event.preventDefault()
-        //     shipsPerPlayer.setCustomValidity("")
-        //
-        //     const checks = shipLengths.querySelectorAll('input')
-        //     const checked = []
-        //     checks.forEach((check) => {
-        //         if (check.checked) {
-        //             checked.push(Number(check.value))
-        //         }
-        //     })
-        //
-        //     if (checked.length > event.target.value) {
-        //         shipsPerPlayer.setCustomValidity('Ships per player is less than the number of ship lengths checked!')
-        //     }
-        // })
+        shipsPerPlayer.addEventListener('change', (event) => { // will only need this as a last resort
+            console.log('spp change', event)
+            event.preventDefault()
+            shipsPerPlayer.setCustomValidity("")
+            if (shipsPerPlayer.parentElement.classList.contains('invalid')) {
+                shipsPerPlayer.parentElement.classList.remove('invalid') // parentElement is its div input container
+            }
+
+            let totalShips = 0
+            const quantities = []
+            const checks = shipLengths.querySelectorAll('input')
+            checks.forEach((check, index) => {
+                if (check.checked) {
+                    quantities.push(checks[index + 1].value)
+                }
+            })
+            console.log('qs', quantities)
+            for (const quantity of quantities) {
+                totalShips += quantity
+            }
+
+            console.log('here', shipsPerPlayer, shipsPerPlayer.value, totalShips)
+            if (Number(shipsPerPlayer.value) < totalShips) {
+                shipsPerPlayer.setCustomValidity("Ships per player is less than selected number of ships!")
+                shipsPerPlayer.parentElement.classList.add('invalid')
+            } else if (Number(shipsPerPlayer.value) > totalShips) {
+                shipsPerPlayer.setCustomValidity('Ships per player is more than selected number of ships!')
+                shipsPerPlayer.parentElement.classList.add('invalid')
+            }
+            shipsPerPlayer.reportValidity()
+        })
 
         container.appendChild(render)
     }
