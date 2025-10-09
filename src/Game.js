@@ -2,16 +2,12 @@ import EventEmitter from "./events"
 import Player from './Player'
 
 export default class Game {
-    constructor(container, settings = { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] }) {
+    constructor(container, settings = { playerCount: 2, boardLength: 8, shipLengths: [3,4,5,6] }) {
         console.log('gs in game', settings)
-        if (Object.keys(settings).length !== 4) {
+        if (Object.keys(settings).length !== 3) {
             throw Error('Missing one or more required game settings!')
         }
-        // while (settings.shipsPerPlayer !== settings.shipLengths.length) { // 3,4,5 with shipsPerPlayer: 4 results in 3,4,5,3
-        //     settings.shipLengths.forEach(length => {
-        //         settings.shipLengths.push(length)
-        //     })
-        // }
+
         this.container = container
         this.events = new EventEmitter()
 

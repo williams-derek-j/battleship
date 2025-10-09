@@ -69,7 +69,7 @@ export default class InitGame {
 
         const shipsCounterLabel = document.createElement('label')
         shipsCounterLabel.htmlFor = 'shipsCounter'
-        shipsCounterLabel.textContent = "Ships per player:"
+        shipsCounterLabel.textContent = "Ships per player: "
 
         const shipsCounter = document.createElement('span')
         shipsCounter.id = 'shipsCounter'
@@ -82,7 +82,7 @@ export default class InitGame {
 
         const squareCounterLabel = document.createElement('label')
         squareCounterLabel.htmlFor = 'squareCounter'
-        squareCounterLabel.textContent = "Squares occupied:"
+        squareCounterLabel.textContent = "Squares occupied: "
 
         const squareCounter = document.createElement('span')
         squareCounter.id = 'squareCounter'
@@ -95,7 +95,7 @@ export default class InitGame {
 
         const occupancyCounterLabel = document.createElement('label')
         occupancyCounterLabel.htmlFor = 'occupancyCounter'
-        occupancyCounterLabel.textContent = "Squares occupied:"
+        occupancyCounterLabel.textContent = "Percent occupied: "
 
         const occupancyCounter = document.createElement('span')
         occupancyCounter.id = 'occupancyCounter'
@@ -157,7 +157,7 @@ export default class InitGame {
                         })
                         const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
-                        if (percentOccupied > .50) {
+                        if (percentOccupied > .50001) {
                             occupancyCounterContainer.classList.add('invalid')
                         }
                         occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
@@ -240,7 +240,7 @@ export default class InitGame {
 
                     const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
-                    if (percentOccupied > .50) {
+                    if (percentOccupied > .50001) {
                         occupancyCounterContainer.classList.add('invalid')
                     } else {
                         if (occupancyCounterContainer.classList.contains('invalid')) {
@@ -249,6 +249,7 @@ export default class InitGame {
                     }
                     occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
                     shipsCounter.textContent = totalShips.toString()
+                    squareCounter.textContent = totalSquares.toString()
                 }
             })
             const quantityCounter = document.createElement('span')
@@ -306,7 +307,7 @@ export default class InitGame {
                     totalSquares += ship
                 })
 
-                if (totalSquares >= boardSize / 2) {
+                if (totalSquares > boardSize / 2) {
                     valid = false
 
                     if (!occupancyCounterContainer.classList.contains('invalid')) {
@@ -328,6 +329,8 @@ export default class InitGame {
                 console.log('****************************form invalid')
             }
         })
+
+        form.appendChild(submit)
 
         pcContainer.appendChild(pcLabel)
         pcInputContainer.appendChild(pcCounter)
@@ -354,8 +357,6 @@ export default class InitGame {
         form.appendChild(occupancyCounterContainer)
 
         form.appendChild(shipLengths)
-
-        form.appendChild(submit)
 
         render.appendChild(form)
 
@@ -393,7 +394,7 @@ export default class InitGame {
 
             const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
-            if (percentOccupied > .50) {
+            if (percentOccupied > .50001) {
                 occupancyCounterContainer.classList.add('invalid')
             } else {
                 if (occupancyCounterContainer.classList.contains('invalid')) {

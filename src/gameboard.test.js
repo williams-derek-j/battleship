@@ -115,16 +115,3 @@ test('Miss attack', () => {
     // expect(listener).toHaveBeenCalled()
     // expect(listener).toHaveBeenCalledWith(expect.objectContaining({ pos: 9 })) // The listener represents either a player object or boat object that listeners for the board to emit hit events
 })
-
-// test('Place all boats', () => {
-//     const board = new Gameboard(64)
-//     board.quantity = 8 // 3, 4, 5, 6-square boat lengths
-//
-//     expect(board.place([0,1,2,3,4,5])).toBeTruthy() // P1, 1, 6
-//     expect(board.place([0,1,2,3,4,5])).toBeTruthy() // P2, 1, 6
-//     expect(board.place([9,17,25,33,41,49])).toBeTruthy() // P2, 1, 6
-//     expect(board.place([10,18,26,34])).toBeTruthy() // P1, 2, 4
-//     expect(board.place([11,19,27,35,43])).toBeTruthy() // P2, 2, 5
-//     expect(board.place([27,28,29])).toBeFalsy() // P1, 3, 3
-//     expect(board.place([]))
-// })
