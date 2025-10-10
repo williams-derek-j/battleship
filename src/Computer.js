@@ -8,7 +8,7 @@ export default class Computer extends Player {
         this.isReal = false
     }
 
-    generateAttack() { // I should generate an adjacency list of a map of available squares. If no previous hits are found, target the square w/ most adjacents, i.e., most isolated square farthest away from nearest sink
+    generateAttack() {
         const boardLength = this.board.length
 
         const alive = []
@@ -225,12 +225,91 @@ export default class Computer extends Player {
                 return Math.floor(Math.random() * (max - min) ) + min;
             }
 
+            const valid = [] // squares adjacent to generated target who indicate that a ship fits in that direction
+
+            while (valid.length === 0) {
+                const target = available[randomInt(0, available[available.length - 1])]
+
+                let mod = (target - (target % boardLength)) + boardLength
+
+                let left = (target - 1) >= (mod - boardLength) ? target - 1 : null // prevent wrapping
+                let right = (target + 1) < mod ? target + 1 : null
+                let top = target - boardLength
+                let bottom = target + boardLength
+
+                while (available.includes(left)) { // how much free space to left? prefer left, then right
+                    left -= 1
+
+                    if (!available.includes(left)) { // found end of free space on left
+                        if (!available.includes(right)) { // found end of free space on right -- there was none
+                            if ((right - left) - 1 >= shipMin) {
+                                valid.push(target - 1) // no free space on right but enough on left to fit smallest ship, therefore 1 square left of hit is valid target
+                            }
+                        } else {
+                            while (available.includes(right)) { // find free space on right
+                                right += 1
+
+                                if (!available.includes(right)) { // found end of free space on both sides
+                                    if ((right - left) - 1 >= shipMin) { // amount of space can fit smallest ship? -- right and left are unavailable spaces, so don't + 1,  actually - 1
+                                        valid.push(target - 1) // if so, square is valid target
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (valid.length === 0) { // preferred left but was none, now check right -- can only get here if there was no valid target to left
+                    while (available.includes(right)) {
+                        right += 1
+                    }
+                    if ((right - left) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
+                        if (available.includes(target + 1)) {
+                            valid.push(target + 1)
+                        }
+                    }
+                    if (valid.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
+                        while (available.includes(top)) {
+                            top -= boardLength
+
+                            if (!available.includes(top)) { // found end of free space on top
+                                if (!available.includes(bottom)) { // found end of free space on bottom -- there was none
+                                    if (((bottom - top) / boardLength) - 1 >= shipMin) {
+                                        valid.push(target - boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square above hit is valid target
+                                    }
+                                } else {
+                                    while (available.includes(bottom)) { // find free space on bottom
+                                        bottom += boardLength
+
+                                        if (!available.includes(bottom)) { // found end of free space on both sides
+                                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1,  actually - 1
+                                                valid.push(target -  boardLength) // if so, square is valid target
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (valid.length === 0) { // prefer left, then right, then top, finally bottom if none else
+                            while (available.includes(bottom)) {
+                                bottom += boardLength
+                            }
+
+                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
+                                if (available.includes(target + boardLength)) {
+                                    valid.push(target + boardLength)
+                                }
+                            }
+                        }
+                    }
+                }
+                if (valid.length === 1) {
+                    console.log('C generated target:', target)
+                    this.attack(target) // isolated hit square had valid targets adjacent
+                } else {
+                    console.log("Computer generated target didn't have space to fit smallest ship! Trying again with new target.")
+                }
+            }
             // write logic to find most isolated square using adjacency list, target being the node w/ most free adjacents
-
-            const target = available[randomInt(0, available.length)]
-
-            console.log('C generated target:', target)
-            this.attack(target) // no previous hits, random target
         }
     }
 

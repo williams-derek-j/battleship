@@ -105,25 +105,13 @@ export default class Gameboard {
                                         }
                                     } else if (vertical === true) { // vertical
                                         let mod = array[0] - (array[0] % boardLength) // find index of square in row -- problem is here im sure
-                                        console.log('mod', mod)
 
-                                        // let mod = this.length // find index of square in row
-                                        // while (mod <= array[0]) {
-                                        //     mod += this.length
-                                        // }
                                         const index = array[0] - mod
 
                                         if (reversed === false) { // V down, top to bottom
                                             for (let i = 1; i < array.length; i++) { // starts at 1 because we are filling squares adjacent to the square we've dropped our ship on, e.g., if 5 then 6, 7, 8 for ship length of 4
-                                                console.log(i)
-                                                console.log('index', index)
-                                                console.log('curr', current)
-                                                console.log('parent', current.parentElement)
-                                                console.log('next', current.parentElement.nextElementSibling)
-                                                console.log('children', current.parentElement.nextElementSibling.children)
                                                 let next = current.parentElement.nextElementSibling.children[index]
 
-                                                console.log(next)
                                                 next.classList.add('occupied')
 
                                                 current = next
