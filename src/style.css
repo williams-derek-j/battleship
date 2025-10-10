@@ -1,7 +1,7 @@
 ::-webkit-scrollbar { display: none; }
 
 html {
-    font-size: 4em;
+    font-size: 2em;
 }
 
 body {
@@ -68,7 +68,7 @@ div.invalid {
     box-sizing: border-box;
 
     background: goldenrod;
-    padding: 2%;
+    padding: 1.5%;
 
     overflow: scroll;
 }
@@ -101,7 +101,7 @@ div.invalid {
 #gameSettingsForm #formHeader > div {
     box-sizing: border-box;
 
-    padding: 2%;
+    padding: 3%;
 
     background: antiquewhite;
 }
@@ -162,7 +162,7 @@ div.invalid {
     /*grid-area: 3 / 1 / span 1 / span 2;*/
     box-sizing: border-box;
 
-    padding: 2%;
+    padding: 1%;
 
     background: antiquewhite;
 
