@@ -1,3 +1,5 @@
+::-webkit-scrollbar { display: none; }
+
 html {
     font-size: 5em;
 }
@@ -23,8 +25,143 @@ div.invalid {
     border: 1px solid red;
 }
 
-.gameSettings {
-    font-size: calc(1rem * (2/3));
+#gameSettings {
+    width: 50vw;
+    height: 70vh;
+}
+
+#gameSettingsForm {
+    font-size: calc(1rem * (2 / 3));
+
+    box-sizing: border-box;
+
+    border: 5px solid black;
+
+    padding: 2.5%;
+
+    background-color: indianred;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: stretch;
+
+    /*display: grid;*/
+
+    /*grid-template-columns: 50% 50%;*/
+    /*!*column-gap: 1.333%;*!*/
+
+    /*grid-template-rows: 5% 25% 70%;*/
+    /*!*row-gap: 1.25%;*!*/
+
+    width: 100%;
+    height: 100%;
+}
+
+/*#gameSettingsForm > div {*/
+/*    background: goldenrod;*/
+/*    padding: 5%;*/
+
+/*    overflow: scroll;*/
+/*}*/
+
+#gameSettingsFormSubmit {
+    /*grid-area: 1 / 1 / span 1 / span 2;*/
+
+    height: 10%;
+
+    font-size: 1rem;
+}
+
+#gameSettingsForm #formHeader {
+    /*grid-area: 2 / 1 / span 1 / span 2;*/
+
+    box-sizing: border-box;
+
+    background: goldenrod;
+
+    padding: 2%;
+
+    /*height: 30%;*/
+    min-height: fit-content;
+
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+#gameSettingsForm #formHeader #inputsContainer {
+    box-sizing: border-box;
+
+    width: 50%;
+    height: 100%;
+    max-height: 100%;
+
+    padding: 5%;
+
+    background: antiquewhite;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+}
+
+#gameSettingsForm #statsContainer {
+    box-sizing: border-box;
+
+    width: 50%;
+    height: 100%;
+
+    padding: 5%;
+
+    background: antiquewhite;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+}
+
+#gameSettingsForm #statsContainer > div {
+    box-sizing: border-box;
+
+    background: #b6aa9c;
+
+    padding: 2%;
+    margin-top: 1%;
+    margin-bottom: 1%;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#gameSettingsForm #shipLengths {
+    /*grid-area: 3 / 1 / span 1 / span 2;*/
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: scroll;
+}
+
+#gameSettingsForm .rangeContainer {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: space-between;
+}
+
+#gameSettingsForm #playerCount {
+    width: 80%;
+}
+
+#gameSettingsForm #boardLength {
+    width: 80%;
 }
 
 .player {
@@ -157,30 +294,74 @@ div.invalid {
     rotate: 90deg;
 }
 
+.ship.len1 {
+    width: 1em;
+
+    background: linear-gradient(90deg, rgba(42, 155, 74, 1) 0%, rgba(153, 199, 87, 1) 50%, rgba(237, 83, 99, 1) 100%);
+}
+
+.ship.len2 {
+    width: 2em;
+
+    background: linear-gradient(90deg, rgba(42, 155, 130, 1) 0%, rgba(97, 199, 87, 1) 50%, rgba(237, 144, 83, 1) 100%);
+}
+
 .ship.len3 {
-    background: linear-gradient(90deg, rgb(53, 75, 189) 0%, rgba(87, 199, 133, 1) 50%, rgb(237, 221, 83, 1) 100%);;
+    width: 3em;
+
+    background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
 }
 
 .ship.len4 {
     width: 4em;
 
-    background: linear-gradient(90deg,rgba(87, 199, 133, 1) 0%, rgba(237, 221, 83, 1) 50%, rgb(237, 129, 83, 1) 100%);;
+    background: linear-gradient(90deg, rgba(42, 67, 155, 1) 0%, rgba(87, 199, 189, 1) 50%, rgba(176, 237, 83, 1) 100%);
 }
 
 .ship.len5 {
     width: 5em;
 
-    background: linear-gradient(90deg,rgba(237, 221, 83, 1) 0%, rgba(237, 129, 83) 50%, rgb(218, 56, 56, 1) 100%);;
+    background: linear-gradient(90deg, rgba(74, 42, 155, 1) 0%, rgba(87, 153, 199, 1) 50%, rgba(99, 237, 83, 1) 100%);
 }
 
 .ship.len6 {
     width: 6em;
 
-    background: linear-gradient(90deg,rgba(237, 129, 83, 1) 0%, rgba(218, 56, 56, 1) 50%, rgb(90, 3, 3, 1) 100%);;
+    background: linear-gradient(90deg, rgba(130, 42, 155, 1) 0%, rgba(87, 97, 199, 1) 50%, rgba(83, 237, 144, 1) 100%);
 }
 
 .ship.len7 {
     width: 7em;
 
-    background: linear-gradient(90deg,rgba(218, 56, 56, 1) 0%, rgba(90, 3, 3, 1) 50%, rgb(37, 3, 38) 100%);;
+    background: linear-gradient(90deg, rgba(155, 42, 123, 1) 0%, rgba(133, 87, 199, 1) 50%, rgba(83, 237, 221, 1) 100%);
+}
+
+.ship.len8 {
+    width: 8em;
+
+    background: linear-gradient(90deg, rgba(155, 42, 67, 1) 0%, rgba(189, 87, 199, 1) 50%, rgba(83, 176, 237, 1) 100%);
+}
+
+.ship.len9 {
+    width: 9em;
+
+    background: linear-gradient(90deg, rgba(155, 74, 42, 1) 0%, rgba(199, 87, 153, 1) 50%, rgba(83, 99, 237, 1) 100%);
+}
+
+.ship.len10 {
+    width: 10em;
+
+    background: linear-gradient(90deg, rgba(155, 130, 42, 1) 0%, rgba(199, 87, 97, 1) 50%, rgba(144, 83, 237, 1) 100%);
+}
+
+.ship.len11 {
+    width: 11em;
+
+    background: linear-gradient(90deg, rgba(123, 155, 42, 1) 0%, rgba(199, 133, 87, 1) 50%, rgba(221, 83, 237, 1) 100%);
+}
+
+.ship.len12 {
+    width: 12em;
+
+    background: linear-gradient(90deg, rgba(67, 155, 42, 1) 0%, rgba(199, 189, 87, 1) 50%, rgba(237, 83, 176, 1) 100%);
 }

@@ -15,6 +15,7 @@ export default class Game {
         this.players = []
         this.survivors = []
         for (let i = 1; i <= settings.playerCount; i++) {
+            console.log('i',i)
             const player = new Player(i, this.events, settings, `Player${i}`);
 
             player.events.on('Hit received', this.sendHit.bind(this))
@@ -101,9 +102,7 @@ export default class Game {
 
                         this.turn = 1
 
-                        console.log('arrived', this.turn)
                         this.play.bind(this)()
-                        console.log('arrived2', this.turn)
                     })
 
                     player.generateAttack()

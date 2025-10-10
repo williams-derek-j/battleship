@@ -1,4 +1,4 @@
-console.log('hi')
+console.log('hi2')
 
 import "./style.css"
 import EventEmitter from 'events'

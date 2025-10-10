@@ -1,28 +1,25 @@
 export default class InitGame {
     constructor(container, emitter) {
         const render = document.createElement('div')
-        render.classList.add('gameSettings')
+        render.id = 'gameSettings'
 
         const form = document.createElement('form')
+        form.id = 'gameSettingsForm'
 
-        const pcContainer = document.createElement('div')
-        pcContainer.id = 'pcContainer'
-        pcContainer.display = 'flex'
-        pcContainer.flexDirection = 'column'
+        const header = document.createElement('div')
+        header.id = 'formHeader'
 
-        const pcLabel = document.createElement('label')
-        pcLabel.htmlFor = 'playerCount'
-        pcLabel.textContent = "# of Players:"
+        const inputsContainer = document.createElement('div')
+        inputsContainer.id = 'inputsContainer'
+        inputsContainer.classList.add('setting')
 
-        const pcInputContainer = document.createElement('div')
-        pcInputContainer.id = 'pcInputContainer'
-        pcInputContainer.style.display = 'flex'
-        pcInputContainer.style.flexDirection = 'row'
-        pcInputContainer.style.justifyContent = 'space-between'
+        const statsContainer = document.createElement('div')
+        statsContainer.id = 'statsContainer'
+        statsContainer.classList.add('stat')
 
         const playerCount = document.createElement('input')
         playerCount.id = 'playerCount'
-        playerCount.classList.add('playerCount')
+        playerCount.classList.add('setting','playerCount')
         playerCount.required = true
         playerCount.type = 'range'
         playerCount.value = '2'
@@ -30,20 +27,45 @@ export default class InitGame {
         playerCount.max = '2'
         playerCount.oninput = () => { playerCount.previousElementSibling.textContent = playerCount.value }
 
+        const pcContainer = document.createElement('div')
+        pcContainer.id = 'pcContainer'
+        pcContainer.classList.add('setting','playerCount')
+        pcContainer.display = 'flex'
+        pcContainer.flexDirection = 'column'
+
+        const pcLabel = document.createElement('label')
+        pcLabel.id = 'pcLabel'
+        pcLabel.classList.add('setting','playerCount')
+        pcLabel.htmlFor = 'playerCount'
+        pcLabel.textContent = "# of Players:"
+
+        const pcInputContainer = document.createElement('div')
+        pcInputContainer.id = 'pcInputContainer'
+        pcInputContainer.classList.add('setting','playerCount','rangeContainer')
+        pcInputContainer.style.display = 'flex'
+        pcInputContainer.style.flexDirection = 'row'
+        pcInputContainer.style.justifyContent = 'space-between'
+
         const pcCounter = document.createElement('span')
+        pcCounter.id = 'pcCounter'
+        pcCounter.classList.add('setting','playerCount')
         pcCounter.textContent = playerCount.value
 
         const blContainer = document.createElement('div')
         blContainer.id = 'blContainer'
+        blContainer.classList.add('setting','boardLength')
         blContainer.display = 'flex'
         blContainer.flexDirection = 'column'
 
         const blLabel = document.createElement('label')
+        blLabel.id = 'blLabel'
+        blLabel.classList.add('setting','boardLength')
         blLabel.htmlFor = 'boardLength'
         blLabel.textContent = "Board Length:"
 
         const blInputContainer = document.createElement('div')
         blInputContainer.id = 'blInputContainer'
+        blInputContainer.classList.add('setting','boardLength','rangeContainer')
         blInputContainer.style.display = 'flex'
         blInputContainer.style.flexDirection = 'row'
         blInputContainer.style.justifyContent = 'space-between'
@@ -51,7 +73,7 @@ export default class InitGame {
         let boardSize = 64
         const boardLength = document.createElement('input')
         boardLength.id = 'boardLength'
-        boardLength.classList.add('boardLength')
+        boardLength.classList.add('setting','boardLength')
         boardLength.required = true
         boardLength.type = 'range'
         boardLength.value = '8'
@@ -60,50 +82,65 @@ export default class InitGame {
         boardLength.oninput = () => { boardLength.previousElementSibling.textContent = boardLength.value }
 
         const blCounter = document.createElement('span')
+        blCounter.id = 'blCounter'
+        blCounter.classList.add('setting','boardLength')
         blCounter.textContent = boardLength.value
-
-        const shipsCounterContainer = document.createElement('div')
-        shipsCounterContainer.id = 'scContainer'
-        shipsCounterContainer.display = 'flex'
-        shipsCounterContainer.flexDirection = 'column'
-
-        const shipsCounterLabel = document.createElement('label')
-        shipsCounterLabel.htmlFor = 'shipsCounter'
-        shipsCounterLabel.textContent = "Ships per player: "
 
         const shipsCounter = document.createElement('span')
         shipsCounter.id = 'shipsCounter'
+        shipsCounter.classList.add('stat','shipsCounter')
         shipsCounter.textContent = '4'
 
-        const squareCounterContainer = document.createElement('div')
-        squareCounterContainer.id = 'sqcContainer'
-        squareCounterContainer.display = 'flex'
-        squareCounterContainer.flexDirection = 'column'
+        const scContainer = document.createElement('div')
+        scContainer.id = 'scContainer'
+        scContainer.classList.add('stat','shipsCounter')
+        scContainer.display = 'flex'
+        scContainer.flexDirection = 'column'
 
-        const squareCounterLabel = document.createElement('label')
-        squareCounterLabel.htmlFor = 'squareCounter'
-        squareCounterLabel.textContent = "Squares occupied: "
+        const scLabel = document.createElement('label')
+        scLabel.id = 'scLabel'
+        scLabel.classList.add('stat','shipsCounter')
+        scLabel.htmlFor = 'shipsCounter'
+        scLabel.textContent = "Ships per player: "
 
         const squareCounter = document.createElement('span')
         squareCounter.id = 'squareCounter'
+        squareCounter.classList.add('stat','squareCounter')
         squareCounter.textContent = '18'
 
-        const occupancyCounterContainer = document.createElement('div')
-        occupancyCounterContainer.id = 'ocContainer'
-        occupancyCounterContainer.display = 'flex'
-        occupancyCounterContainer.flexDirection = 'column'
+        const sqcContainer = document.createElement('div')
+        sqcContainer.id = 'sqcContainer'
+        sqcContainer.classList.add('stat','squareCounter')
+        sqcContainer.display = 'flex'
+        sqcContainer.flexDirection = 'column'
 
-        const occupancyCounterLabel = document.createElement('label')
-        occupancyCounterLabel.htmlFor = 'occupancyCounter'
-        occupancyCounterLabel.textContent = "Percent occupied: "
+        const sqcLabel = document.createElement('label')
+        sqcLabel.id = 'sqcLabel'
+        sqcLabel.classList.add('stat','squareCounter')
+        sqcLabel.htmlFor = 'squareCounter'
+        sqcLabel.textContent = "Squares occupied: "
 
         const occupancyCounter = document.createElement('span')
         occupancyCounter.id = 'occupancyCounter'
+        occupancyCounter.classList.add('stat','occupancyCounter')
         occupancyCounter.textContent = '28%'
+
+        const ocContainer = document.createElement('div')
+        ocContainer.id = 'ocContainer'
+        ocContainer.classList.add('stat','occupancyCounter')
+        ocContainer.display = 'flex'
+        ocContainer.flexDirection = 'column'
+
+        const ocLabel = document.createElement('label')
+        ocLabel.id = 'ocLabel'
+        ocLabel.classList.add('stat','occupancyCounter')
+        ocLabel.htmlFor = 'occupancyCounter'
+        ocLabel.textContent = "Percent occupied: "
 
         const shipsActive = [{ value: 3, quantity: 1 }, { value: 4, quantity: 1 }, { value: 5, quantity: 1 }, { value: 6, quantity: 1 }]
         const shipLengths = document.createElement('div')
-        shipLengths.classList.add('shipLengths')
+        shipLengths.id = 'shipLengths'
+        shipLengths.classList.add('setting')
 
         const lengths = []
         for (let i = 1; i <= boardLength.max; i++) {
@@ -112,14 +149,17 @@ export default class InitGame {
 
         lengths.forEach((length) => {
             const container = document.createElement('div')
+            container.id = `c${length}Container`
 
             const check = document.createElement('input')
+            check.id = `check${length}`
             check.type = 'checkbox'
             check.value = length
-            check.id = `check${length}`
-            check.classList.add('ship','check')
+            check.classList.add('setting','ship',`check${length}`)
 
             const label = document.createElement('label')
+            label.id = `c${length}Label`
+            label.classList.add('setting','ship',`len${length}`,`check${length}`)
             label.textContent = `${length}:`
             label.htmlFor = `check${length}`
 
@@ -139,8 +179,8 @@ export default class InitGame {
                         throw Error("Couldn't app ship to shipsActive! Already contained ship.")
                     }
 
-                    if (squareCounterContainer.classList.contains('invalid')) { // squareCounter gets invalid class when it hits 0 squares occupied
-                        squareCounterContainer.classList.remove('invalid')
+                    if (sqcContainer.classList.contains('invalid')) { // squareCounter gets invalid class when it hits 0 squares occupied
+                        sqcContainer.classList.remove('invalid')
                     }
 
                     if (value > Number(boardLength.value)) {
@@ -162,7 +202,7 @@ export default class InitGame {
                         const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
                         if (percentOccupied > .50001) {
-                            occupancyCounterContainer.classList.add('invalid')
+                            ocContainer.classList.add('invalid')
                         }
                         occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
                         shipsCounter.textContent = totalShips.toString()
@@ -212,13 +252,13 @@ export default class InitGame {
                     const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
                     if (percentOccupied < .50001) {
-                        if (occupancyCounterContainer.classList.contains('invalid')) {
-                            occupancyCounterContainer.classList.remove('invalid')
+                        if (ocContainer.classList.contains('invalid')) {
+                            ocContainer.classList.remove('invalid')
                         }
                     }
                     if (percentOccupied < .00001) {
-                        if (!squareCounterContainer.classList.contains('invalid')) {
-                            squareCounterContainer.classList.add('invalid')
+                        if (!sqcContainer.classList.contains('invalid')) {
+                            sqcContainer.classList.add('invalid')
                         }
                     }
                     occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
@@ -228,6 +268,7 @@ export default class InitGame {
             })
 
             const quantityContainer = document.createElement('div')
+            quantityContainer.classList.add('rangeContainer')
             quantityContainer.style.display = 'flex'
             quantityContainer.style.flexDirection = 'row'
             quantityContainer.style.justifyContent = 'space-between'
@@ -259,10 +300,10 @@ export default class InitGame {
                     const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
                     if (percentOccupied > .50001) {
-                        occupancyCounterContainer.classList.add('invalid')
+                        ocContainer.classList.add('invalid')
                     } else {
-                        if (occupancyCounterContainer.classList.contains('invalid')) {
-                            occupancyCounterContainer.classList.remove('invalid')
+                        if (ocContainer.classList.contains('invalid')) {
+                            ocContainer.classList.remove('invalid')
                         }
                     }
                     occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
@@ -284,6 +325,7 @@ export default class InitGame {
         })
 
         const submit = document.createElement('button')
+        submit.id = 'gameSettingsFormSubmit'
         submit.textContent = 'Submit'
         submit.addEventListener('click', (event) => {
             event.preventDefault()
@@ -302,7 +344,7 @@ export default class InitGame {
                         valid = false
                     } else {
                         if (!input.className.includes('ship quantity')) {
-                            const settingName = input.className
+                            const settingName = input.id
                             settings[settingName] = Number(input.value)
                         }
                     }
@@ -324,21 +366,21 @@ export default class InitGame {
             if (totalSquares > boardSize / 2) {
                 valid = false
 
-                if (!occupancyCounterContainer.classList.contains('invalid')) {
-                    occupancyCounterContainer.classList.add('invalid')
+                if (!ocContainer.classList.contains('invalid')) {
+                    ocContainer.classList.add('invalid')
                 }
             } else if (totalSquares === 0) {
                 valid = false
 
-                if (!squareCounterContainer.classList.contains('invalid')) {
-                    squareCounterContainer.classList.add('invalid')
+                if (!sqcContainer.classList.contains('invalid')) {
+                    sqcContainer.classList.add('invalid')
                 }
             } else {
-                if (occupancyCounterContainer.classList.contains('invalid')) {
-                    occupancyCounterContainer.classList.remove('invalid')
+                if (ocContainer.classList.contains('invalid')) {
+                    ocContainer.classList.remove('invalid')
                 }
-                if (squareCounterContainer.classList.contains('invalid')) {
-                    squareCounterContainer.classList.remove('invalid')
+                if (sqcContainer.classList.contains('invalid')) {
+                    sqcContainer.classList.remove('invalid')
                 }
             }
 
@@ -351,36 +393,6 @@ export default class InitGame {
                 console.log('****************************form invalid')
             }
         })
-
-        form.appendChild(submit)
-
-        pcContainer.appendChild(pcLabel)
-        pcInputContainer.appendChild(pcCounter)
-        pcInputContainer.appendChild(playerCount)
-        pcContainer.appendChild(pcInputContainer)
-        form.appendChild(pcContainer)
-
-        blContainer.appendChild(blLabel)
-        blInputContainer.appendChild(blCounter)
-        blInputContainer.appendChild(boardLength)
-        blContainer.appendChild(blInputContainer)
-        form.appendChild(blContainer)
-
-        shipsCounterContainer.appendChild(shipsCounterLabel)
-        shipsCounterContainer.appendChild(shipsCounter)
-        form.appendChild(shipsCounterContainer)
-
-        squareCounterContainer.appendChild(squareCounterLabel)
-        squareCounterContainer.appendChild(squareCounter)
-        form.appendChild(squareCounterContainer)
-
-        occupancyCounterContainer.appendChild(occupancyCounterLabel)
-        occupancyCounterContainer.appendChild(occupancyCounter)
-        form.appendChild(occupancyCounterContainer)
-
-        form.appendChild(shipLengths)
-
-        render.appendChild(form)
 
         boardLength.addEventListener('change', (event) => {
             event.preventDefault(); // dunno if necessary
@@ -417,16 +429,50 @@ export default class InitGame {
             const percentOccupied = Math.round((totalSquares / boardSize) * 100) / 100
 
             if (percentOccupied > .50001) {
-                occupancyCounterContainer.classList.add('invalid')
+                ocContainer.classList.add('invalid')
             } else {
-                if (occupancyCounterContainer.classList.contains('invalid')) {
-                    occupancyCounterContainer.classList.remove('invalid')
+                if (ocContainer.classList.contains('invalid')) {
+                    ocContainer.classList.remove('invalid')
                 }
             }
             occupancyCounter.textContent = `${(percentOccupied * 100).toFixed(0)}%`
 
             boardLength.reportValidity();
         })
+
+        form.appendChild(submit)
+
+        pcContainer.appendChild(pcLabel)
+        pcInputContainer.appendChild(pcCounter)
+        pcInputContainer.appendChild(playerCount)
+        pcContainer.appendChild(pcInputContainer)
+        inputsContainer.appendChild(pcContainer)
+
+        blContainer.appendChild(blLabel)
+        blInputContainer.appendChild(blCounter)
+        blInputContainer.appendChild(boardLength)
+        blContainer.appendChild(blInputContainer)
+        inputsContainer.appendChild(blContainer)
+
+        scContainer.appendChild(scLabel)
+        scContainer.appendChild(shipsCounter)
+        statsContainer.appendChild(scContainer)
+
+        sqcContainer.appendChild(sqcLabel)
+        sqcContainer.appendChild(squareCounter)
+        statsContainer.appendChild(sqcContainer)
+
+        ocContainer.appendChild(ocLabel)
+        ocContainer.appendChild(occupancyCounter)
+        statsContainer.appendChild(ocContainer)
+
+        header.appendChild(inputsContainer)
+        header.appendChild(statsContainer)
+
+        form.appendChild(header)
+        form.appendChild(shipLengths)
+
+        render.appendChild(form)
 
         container.appendChild(render)
     }
