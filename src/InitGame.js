@@ -150,12 +150,17 @@ export default class InitGame {
         lengths.forEach((length) => {
             const container = document.createElement('div')
             container.id = `c${length}Container`
+            container.classList.add('setting','shipSelect',`check${length}`)
+
+            const checkContainer = document.createElement('div')
+            checkContainer.id = `c${length}CheckContainer`
+            checkContainer.classList.add('setting','shipSelect','checkContainer',`check${length}`)
 
             const check = document.createElement('input')
             check.id = `check${length}`
             check.type = 'checkbox'
             check.value = length
-            check.classList.add('setting','ship',`check${length}`)
+            check.classList.add('setting','shipSelect',`check${length}`)
 
             const label = document.createElement('label')
             label.id = `c${length}Label`
@@ -280,9 +285,10 @@ export default class InitGame {
             quantity.value = '1'
             quantity.min = '1'
             quantity.max = '8'
+            quantity.oninput = () => {
+                quantity.previousElementSibling.textContent = quantity.value
+            }
             quantity.addEventListener('change', (event) => {
-                quantityCounter.textContent = `#: ${quantity.value}`
-
                 if (check.checked) {
                     const ship = shipsActive.find(ship => ship.value === Number(check.value))
                     ship.quantity = Number(event.target.value)
@@ -312,13 +318,16 @@ export default class InitGame {
                 }
             })
             const quantityCounter = document.createElement('span')
-            quantityCounter.textContent = `#: ${quantity.value}`
+            quantityCounter.id = `c${length}QuantityCounter`
+            quantityCounter.textContent = `${ quantity.value }`
 
             quantityContainer.appendChild(quantityCounter)
             quantityContainer.appendChild(quantity)
 
-            container.appendChild(label)
-            container.appendChild(check)
+            checkContainer.appendChild(label)
+            checkContainer.appendChild(check)
+
+            container.appendChild(checkContainer)
             container.appendChild(quantityContainer)
 
             shipLengths.appendChild(container)

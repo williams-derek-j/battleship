@@ -1,7 +1,7 @@
 ::-webkit-scrollbar { display: none; }
 
 html {
-    font-size: 5em;
+    font-size: 4em;
 }
 
 body {
@@ -26,18 +26,22 @@ div.invalid {
 }
 
 #gameSettings {
-    width: 50vw;
-    height: 70vh;
+    width: 70vw;
+    height: 90vh;
+
+    overflow: scroll;
 }
 
 #gameSettingsForm {
-    font-size: calc(1rem * (2 / 3));
-
     box-sizing: border-box;
+
+    font-size: calc(1rem * (2 / 3));
 
     border: 5px solid black;
 
     padding: 2.5%;
+
+    overflow: scroll;
 
     background-color: indianred;
 
@@ -56,14 +60,18 @@ div.invalid {
 
     width: 100%;
     height: 100%;
+    max-height: 100%;
+    max-width: 100%;
 }
 
-/*#gameSettingsForm > div {*/
-/*    background: goldenrod;*/
-/*    padding: 5%;*/
+#gameSettingsForm > div {
+    box-sizing: border-box;
 
-/*    overflow: scroll;*/
-/*}*/
+    background: goldenrod;
+    padding: 2%;
+
+    overflow: scroll;
+}
 
 #gameSettingsFormSubmit {
     /*grid-area: 1 / 1 / span 1 / span 2;*/
@@ -80,9 +88,7 @@ div.invalid {
 
     background: goldenrod;
 
-    padding: 2%;
-
-    /*height: 30%;*/
+    height: 30%;
     min-height: fit-content;
 
     display: flex;
@@ -92,14 +98,18 @@ div.invalid {
     align-items: stretch;
 }
 
-#gameSettingsForm #formHeader #inputsContainer {
+#gameSettingsForm #formHeader > div {
     box-sizing: border-box;
 
+    padding: 2%;
+
+    background: antiquewhite;
+}
+
+#gameSettingsForm #formHeader #inputsContainer {
     width: 50%;
     height: 100%;
     max-height: 100%;
-
-    padding: 5%;
 
     background: antiquewhite;
 
@@ -110,12 +120,8 @@ div.invalid {
 }
 
 #gameSettingsForm #statsContainer {
-    box-sizing: border-box;
-
     width: 50%;
     height: 100%;
-
-    padding: 5%;
 
     background: antiquewhite;
 
@@ -142,9 +148,50 @@ div.invalid {
 
 #gameSettingsForm #shipLengths {
     /*grid-area: 3 / 1 / span 1 / span 2;*/
+    box-sizing: border-box;
+
+    max-height: 60%;
 
     display: flex;
     flex-direction: column;
+
+    overflow: scroll;
+}
+
+#gameSettingsForm #shipLengths > div.shipSelect {
+    /*grid-area: 3 / 1 / span 1 / span 2;*/
+    box-sizing: border-box;
+
+    padding: 2%;
+
+    background: antiquewhite;
+
+    margin-top: 1%;
+    margin-bottom: 1%;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: fit-content;
+
+    overflow: scroll;
+}
+
+#gameSettingsForm #shipLengths > div.shipSelect:first-child {
+    margin-top: 0%;
+}
+
+#gameSettingsForm #shipLengths > div.shipSelect:last-child {
+    margin-bottom: 0%;
+}
+
+#gameSettingsForm #shipLengths > div.shipSelect > .checkContainer {
+    /*grid-area: 3 / 1 / span 1 / span 2;*/
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 
     overflow: scroll;
 }
@@ -154,6 +201,11 @@ div.invalid {
     flex-direction: row;
 
     justify-content: space-between;
+    align-items: center;
+}
+
+#gameSettingsForm .rangeContainer > input {
+    width: 80%;
 }
 
 #gameSettingsForm #playerCount {
