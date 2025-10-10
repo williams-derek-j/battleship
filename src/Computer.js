@@ -100,22 +100,36 @@ export default class Computer extends Player {
 
                 if (horizontal.length >= vertical.length) {
                     console.log('checking horiz')
-                    let left = horizontal[0]
-                    let mod = (left - (left % boardLength)) + boardLength
-                    let adjL = left - 1 >= mod - boardLength ? left - 1 : null // ternary check prevents wrapping
-                    console.log('l,m,adjL',left,mod,adjL)
+                    let mostL = horizontal[0] // most left hit
+                    let mod = mostL - (mostL % boardLength)
+                    let adjL = mostL - 1 >= mod ? mostL - 1 : null // ternary check prevents wrapping
+                    let endL = adjL === null ? mostL : adjL
+                    while (available.includes(endL && endL > mod)) {
+                        endL -= 1
+                    }
+                    console.log('l,m,adjL,eL',mostL,mod,adjL,endL)
 
-                    let right = horizontal[horizontal.length - 1]
-                    let adjR = right + 1 < mod ? right + 1 : null
-                    console.log('r,adjr',right,adjR)
+                    let mostR = horizontal[horizontal.length - 1] // most right hit
+                    let adjR = mostR + 1 < mod + boardLength ? mostR + 1 : null
+                    let endR = adjR
+                    while (available.includes(endR && endR < mod + boardLength)) {
+                        endR += 1
+                    }
+                    console.log('r,adjr,endR',mostR,adjR,endR)
 
                     if (available.includes(adjL)) {
-                        if ((right - adjL) + 1 /* +1 or right + 1*/ >= shipMin) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
+                        const newLen = (mostR - adjL) + 1 // or right + 1
+                        const space = (mostR - endL) + 1
+
+                        if (newLen <= shipMax && space >= shipMin) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
                             targets.push(adjL)
                         }
                     } else { // prefer left, could rewrite to randomly pick left or right
                         if (available.includes(adjR)) {
-                            if ((adjR - left) + 1 >= shipMin) {
+                            const newLen = (adjR - mostL) + 1
+                            const space = (endR - mostL) + 1
+
+                            if (newLen <= shipMax && space >= shipMin) {
                                 targets.push(adjR)
                             }
                         }
@@ -127,16 +141,22 @@ export default class Computer extends Player {
                     let adjT = top - boardLength
                     let bottom =  vertical[vertical.length - 1]
                     let adjB = bottom + boardLength
+                    console.log('top,adjt,bottom,adjB',top,adjT,bottom,adjB)
+                    console.log('hi', ((bottom - adjT) / boardLength) + 1, ((adjB - top) / boardLength) + 1)
 
                     if (available.includes(adjT)) {
-                        if (((bottom - adjT) / boardLength) + 1 <= shipMax) {
+                        const space = ((bottom - adjT) / boardLength) + 1
+                        if (space <= shipMax) {
                             targets.push(adjT)
                         }
                     } else { // prefer top
                         if (available.includes(adjB)) {
-                            if (((adjB - top) / boardLength) + 1 <= shipMax) {
+                            const space = ((adjB - top) / boardLength) + 1
+                            console.log('yo', adjB)
+                            if (space <= shipMax) {
                                 targets.push(adjB)
                             }
+                            console.log(targets, (adjB - top) / boardLength)
                         }
                     }
                 }

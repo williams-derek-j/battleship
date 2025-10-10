@@ -404,7 +404,7 @@ test('Attack double vertical', () => {
     expect([27]).toContain(listener.mock.calls[0][0])
 })
 
-test('Attack double vertical on wall', () => {
+test('Attack double vertical on left wall', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
@@ -434,7 +434,7 @@ test('Attack double vertical on wall', () => {
     expect([16]).toContain(listener.mock.calls[0][0])
 })
 
-test('Attack double vertical on opposite wall', () => {
+test('Attack double vertical on right wall', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
@@ -464,7 +464,7 @@ test('Attack double vertical on opposite wall', () => {
     expect([22]).toContain(listener.mock.calls[0][0])
 })
 
-test.only('Attack double vertical on opposite wall with gap but ship too long', () => {
+test('Attack double vertical on right wall with gap but ship too long for horizontal placement', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [4,5,6] })
@@ -477,7 +477,7 @@ test.only('Attack double vertical on opposite wall with gap but ship too long', 
 
     // [   0 _,_,_,_,_,M,M,_,8
     //     8 _,_,_,_,M,H,H,_,16
-    //     16_,_,_,_,_,_,_,_,24
+    //     16_,_,_,_,_,X,_,_,24
     //     24_,_,_,_,_,_,_,_,32
     //     32_,_,_,_,_,_,_,_,40
     //     40_,_,_,_,_,_,_,_,48
@@ -492,6 +492,68 @@ test.only('Attack double vertical on opposite wall with gap but ship too long', 
     expect(listener).toHaveBeenCalled()
     expect([21,22]).toContain(listener.mock.calls[0][0])
     expect([21]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack double row on bottom', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [4,5,6] })
+
+    comp.board.offense[44] = 1
+    comp.board.offense[52] = 2
+    comp.board.offense[53] = 1
+    comp.board.offense[60] = 2
+    comp.board.offense[61] = 1
+
+    // [   0 _,_,_,_,_,_,_,_,8
+    //     8 _,_,_,_,_,_,_,_,16
+    //     16_,_,_,_,_,_,_,_,24
+    //     24_,_,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,M,_,_,_,48
+    //     48_,_,_,X,H,M,_,_,56
+    //     56_,_,_,_,H,M,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([51,59]).toContain(listener.mock.calls[0][0])
+    expect([51]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack double row on top', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [4,5,6] })
+
+    comp.board.offense[0] = 2
+    comp.board.offense[1] = 2
+    comp.board.offense[8] = 2
+    comp.board.offense[9] = 2
+    comp.board.offense[16] = 1
+    comp.board.offense[17] = 2
+    comp.board.offense[25] = 1
+
+    // [   0 H,H,V,_,_,_,_,_,8
+    //     8 H,H,X,_,_,_,_,_,16
+    //     16M,H,X,_,_,_,_,_,24
+    //     24_,M,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,_,_,_,_,_,56
+    //     56_,_,_,_,_,_,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([2,10,18]).toContain(listener.mock.calls[0][0])
+    expect([2]).toContain(listener.mock.calls[0][0])
 })
 
 test('Attack T', () => {
