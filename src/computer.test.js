@@ -368,6 +368,132 @@ test('Attack fake line', () => {
     expect([3,4,5,19,20,21]).toContain(listener.mock.calls[0][0])
 })
 
+test('Attack double vertical', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
+    comp.board.offense[3] = 1
+    comp.board.offense[4] = 1
+    comp.board.offense[10] = 1
+    comp.board.offense[11] = 2
+    comp.board.offense[12] = 2
+    comp.board.offense[13] = 1
+    comp.board.offense[19] = 2
+    comp.board.offense[20] = 0
+    comp.board.offense[27] = 0
+    comp.board.offense[28] = 0
+    comp.board.offense[35] = 0
+    comp.board.offense[36] = 0
+
+    // [   0 _,_,_,M,M,_,_,_,8
+    //     8 _,_,M,H,H,M,_,_,16
+    //     16_,_,_,H,o,_,_,_,24
+    //     24_,_,_,X,o,_,_,_,32
+    //     32_,_,_,o,o,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,_,_,_,_,_,56
+    //     56_,_,_,_,_,_,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([27]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack double vertical on wall', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
+    comp.board.offense[0] = 1
+    comp.board.offense[1] = 1
+    comp.board.offense[8] = 2
+    comp.board.offense[9] = 2
+    comp.board.offense[10] = 1
+
+    // [   0 M,M,_,_,_,_,_,_,8
+    //     8 H,H,M,_,_,_,_,_,16
+    //     16X,_,_,_,_,_,_,_,24
+    //     24_,_,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,_,_,_,_,_,56
+    //     56_,_,_,_,_,_,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([16,17]).toContain(listener.mock.calls[0][0])
+    expect([16]).toContain(listener.mock.calls[0][0])
+})
+
+test('Attack double vertical on opposite wall', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
+    comp.board.offense[6] = 1
+    comp.board.offense[7] = 1
+    comp.board.offense[13] = 1
+    comp.board.offense[14] = 2
+    comp.board.offense[15] = 2
+
+    // [   0 _,_,_,_,_,_,M,M,8
+    //     8 _,_,_,_,_,M,H,H,16
+    //     16_,_,_,_,_,_,X,_,24
+    //     24_,_,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,_,_,_,_,_,56
+    //     56_,_,_,_,_,_,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([22,23]).toContain(listener.mock.calls[0][0])
+    expect([22]).toContain(listener.mock.calls[0][0])
+})
+
+test.only('Attack double vertical on opposite wall with gap but ship too long', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [4,5,6] })
+
+    comp.board.offense[5] = 1
+    comp.board.offense[6] = 1
+    comp.board.offense[12] = 1
+    comp.board.offense[13] = 2
+    comp.board.offense[14] = 2
+
+    // [   0 _,_,_,_,_,M,M,_,8
+    //     8 _,_,_,_,M,H,H,_,16
+    //     16_,_,_,_,_,_,_,_,24
+    //     24_,_,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,_,_,_,_,_,56
+    //     56_,_,_,_,_,_,_,_,64    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([21,22]).toContain(listener.mock.calls[0][0])
+    expect([21]).toContain(listener.mock.calls[0][0])
+})
+
 test('Attack T', () => {
     const eventsP = new EventEmitter()
 
@@ -935,4 +1061,13 @@ test('Attack cross 6', () => {
 //     40_,_,_,_,_,_,_,_47
 //     48_,_,_,_,_,_,_,_55
 //     56_,_,_,_,_,_,_,_63   ]
+
+// [   0 _,_,_,_,_,_,_,_,8
+//     8 _,_,_,_,_,_,_,_,16
+//     16_,_,_,_,_,_,_,_,24
+//     24_,_,_,_,_,_,_,_,32
+//     32_,_,_,_,_,_,_,_,40
+//     40_,_,_,_,_,_,_,_,48
+//     48_,_,_,_,_,_,_,_,56
+//     56_,_,_,_,_,_,_,_,64    ]
 

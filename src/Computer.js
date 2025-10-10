@@ -83,6 +83,8 @@ export default class Computer extends Player {
                     hitMap[hit] = adjacents
                 }
 
+                console.log('hM',hitMap)
+
                 let current = Object.keys(hitMap)[0]
                 for (let hit in hitMap) {
                     if (hitMap[hit].reduce((total, current) => { return total + current.length }, 0) > hitMap[current].reduce((total, current) => { return total + current.length }, 0)) {
@@ -90,32 +92,37 @@ export default class Computer extends Player {
                     }
                 }
                 hit = Number(current)
-                // console.log('hit', hit, typeof hit, hits.indexOf(hit))
+                console.log('hit', hit, typeof hit, hits.indexOf(hit))
 
                 const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
                 const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
+                console.log('h,v',horizontal,vertical)
 
                 if (horizontal.length >= vertical.length) {
+                    console.log('checking horiz')
                     let left = horizontal[0]
                     let mod = (left - (left % boardLength)) + boardLength
                     let adjL = left - 1 >= mod - boardLength ? left - 1 : null // ternary check prevents wrapping
+                    console.log('l,m,adjL',left,mod,adjL)
 
                     let right = horizontal[horizontal.length - 1]
                     let adjR = right + 1 < mod ? right + 1 : null
+                    console.log('r,adjr',right,adjR)
 
                     if (available.includes(adjL)) {
-                        if ((right - adjL) + 1 <= shipMax) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
+                        if ((right - adjL) + 1 /* +1 or right + 1*/ >= shipMin) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
                             targets.push(adjL)
                         }
                     } else { // prefer left, could rewrite to randomly pick left or right
                         if (available.includes(adjR)) {
-                            if ((adjR - left) + 1 <= shipMax) {
+                            if ((adjR - left) + 1 >= shipMin) {
                                 targets.push(adjR)
                             }
                         }
                     }
                 }
                 if (targets.length === 0) { // horizontal might have been longer but had no available targets
+                    console.log('checking vert')
                     let top = vertical[0]
                     let adjT = top - boardLength
                     let bottom =  vertical[vertical.length - 1]
@@ -136,14 +143,16 @@ export default class Computer extends Player {
             }
 
             if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
-                let mod = (hit - (hit % boardLength)) + boardLength
+                // let mod = (hit - (hit % boardLength)) + boardLength
 
-                let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
-                let right = (hit + 1) < mod ? hit + 1 : null
+                // let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
+                let left = hit - 1
+                // let right = (hit + 1) < mod ? hit + 1 : null
+                let right = hit + 1
                 let top = hit - boardLength
                 let bottom = hit + boardLength
 
-                while (available.includes(left)) { // how much free space to left?
+                while (available.includes(left)) { // LEFT -- how much free space to left?
                     left -= 1
 
                     if (!available.includes(left)) { // found end of free space on left
@@ -164,7 +173,7 @@ export default class Computer extends Player {
                         }
                     }
                 }
-                if (targets.length === 0) { // prefer left, then right -- can only get here if there was no valid target to left
+                if (targets.length === 0) { // RIGHT -- prefer left, then right -- can only get here if there was no valid target to left
                     while (available.includes(right)) {
                         right += 1
                     }
@@ -173,7 +182,7 @@ export default class Computer extends Player {
                             targets.push(hit + 1)
                         }
                     }
-                    if (targets.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
+                    if (targets.length === 0) { // TOP -- prefer left, then right, then top -- can only get here if there was no valid target to left or right
                         while (available.includes(top)) {
                             top -= boardLength
 
@@ -195,7 +204,7 @@ export default class Computer extends Player {
                                 }
                             }
                         }
-                        if (targets.length === 0) { // prefer left, then right, then top, finally bottom if none else
+                        if (targets.length === 0) { // BOTTOM -- prefer left, then right, then top, finally bottom if none else
                             while (available.includes(bottom)) {
                                 bottom += boardLength
                             }
@@ -215,7 +224,7 @@ export default class Computer extends Player {
                     throw Error(`isolated hit square somehow had no valid adjacent targets or had more than 1 assigned, something is wrong w/ logic -- targets.length: ${targets.length}`)
                 }
             } else if (targets.length === 1) {
-               console.log('B generated target:', targets[0])
+                console.log('B generated target:', targets[0])
                 this.attack(targets[0]) // chain of hits had valid targets adjacent
             } else {
                throw Error('chain of hits somehow had more than 1 valid adjacent target assigned, something is wrong w/ logic')
