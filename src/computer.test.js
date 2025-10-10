@@ -1,7 +1,7 @@
 import EventEmitter from './Events'
 import Computer from './Computer'
 
-test.only('Place ships', () => {
+test.skip('Place ships', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
@@ -18,7 +18,7 @@ test.only('Place ships', () => {
 test('Attack empty board', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
 
     const listener = jest.fn()
     comp.eventsP.on('Attack', listener)
@@ -34,7 +34,8 @@ test('Attack empty board', () => {
 test('Attack lone hit', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[9] = 2
         // [   _,X,_,_,_,_,_,_,
         //     X,H,X,_,_,_,_,_,
@@ -54,10 +55,38 @@ test('Attack lone hit', () => {
     expect([1,8,10,17]).toContain(listener.mock.calls[0][0])
 })
 
+test('Attack w/ empty space measurement', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
+    for (let i = 0; i < comp.board.offense.length; i++) {
+        comp.board.offense[i] = -1
+    }
+    comp.board.offense[10] = 0
+    comp.board.offense[11] = 0
+
+    // [   S,S,S,S,S,S,S,S,
+    //     S,S,_,_,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,
+    //     S,S,S,S,S,S,S,S,    ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    expect(listener).not.toHaveBeenCalled()
+    expect(() => comp.generateAttack()).toThrow()
+})
+
 test('Attack pair of hits', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[9] = 2
     comp.board.offense[10] = 2
     // [   _,_,_,_,_,_,_,_,
@@ -81,7 +110,8 @@ test('Attack pair of hits', () => {
 test('Attack vertical pair of hits', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[9] = 2
     comp.board.offense[17] = 2
     // [   _,X,_,_,_,_,_,_,
@@ -105,7 +135,8 @@ test('Attack vertical pair of hits', () => {
 test('Attack triple of hits', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[9] = 2
     comp.board.offense[10] = 2
     comp.board.offense[11] = 2
@@ -130,7 +161,8 @@ test('Attack triple of hits', () => {
 test('Attack vertical triple of hits', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[10] = 2
     comp.board.offense[18] = 2
     comp.board.offense[26] = 2
@@ -155,7 +187,8 @@ test('Attack vertical triple of hits', () => {
 test('Attack triple of hits on wall', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[8] = 2
     comp.board.offense[9] = 2
     comp.board.offense[10] = 2
@@ -180,7 +213,8 @@ test('Attack triple of hits on wall', () => {
 test('Attack pair of hits on opposite wall', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[13] = 2
     comp.board.offense[14] = 2
     comp.board.offense[15] = 2
@@ -205,7 +239,8 @@ test('Attack pair of hits on opposite wall', () => {
 test('Attack triple of hits on ceiling', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[6] = 2
     comp.board.offense[14] = 2
     comp.board.offense[22] = 2
@@ -230,7 +265,8 @@ test('Attack triple of hits on ceiling', () => {
 test('Attack triple of hits on floor', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[46] = 2
     comp.board.offense[54] = 2
     comp.board.offense[62] = 2
@@ -255,7 +291,8 @@ test('Attack triple of hits on floor', () => {
 test('Attack other side after miss', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[0] = 1
     comp.board.offense[1] = 2
     comp.board.offense[2] = 2
@@ -280,7 +317,8 @@ test('Attack other side after miss', () => {
 test('Attack other side after miss vertical', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[0] = 1
     comp.board.offense[8] = 2
     comp.board.offense[16] = 2
@@ -305,7 +343,8 @@ test('Attack other side after miss vertical', () => {
 test('Attack fake line', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[10] = 1
     comp.board.offense[11] = 2
     comp.board.offense[12] = 2
@@ -332,7 +371,8 @@ test('Attack fake line', () => {
 test('Attack T', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[3] = 1
     comp.board.offense[10] = 1
     comp.board.offense[11] = 2
@@ -361,7 +401,8 @@ test('Attack T', () => {
 test('Attack T 2', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[3] = 1
     comp.board.offense[10] = 1
     comp.board.offense[11] = 2
@@ -392,7 +433,8 @@ test('Attack T 2', () => {
 test('Attack lineup', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
     comp.board.offense[3] = 1
     comp.board.offense[10] = 1
     comp.board.offense[11] = -1
@@ -424,7 +466,8 @@ test('Attack lineup', () => {
 test('Attack lineup 2', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[27] = 1
     comp.board.offense[28] = 1
@@ -459,7 +502,8 @@ test('Attack lineup 2', () => {
 test('Attack lineup 3', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[27] = 1
     comp.board.offense[28] = 1
@@ -495,7 +539,8 @@ test('Attack lineup 3', () => {
 test('Attack lineup 4', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[27] = 1
     comp.board.offense[28] = 1
@@ -532,7 +577,8 @@ test('Attack lineup 4', () => {
 test('Attack lineup 5', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[27] = 1
     comp.board.offense[28] = 1
@@ -571,7 +617,8 @@ test('Attack lineup 5', () => {
 test('Attack end to end', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[32] = -1
     comp.board.offense[33] = -1
@@ -601,7 +648,8 @@ test('Attack end to end', () => {
 test('Attack end to end 2', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[32] = -1
     comp.board.offense[33] = -1
@@ -633,7 +681,8 @@ test('Attack end to end 2', () => {
 test('Attack cross', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[12] = 1
     comp.board.offense[20] = 2
@@ -668,7 +717,8 @@ test('Attack cross', () => {
 test('Attack cross 2', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[12] = 1
     comp.board.offense[20] = 2
@@ -706,7 +756,8 @@ test('Attack cross 2', () => {
 test('Attack cross 3', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[4] = 1
     comp.board.offense[12] = 2
@@ -745,7 +796,8 @@ test('Attack cross 3', () => {
 test('Attack cross 4', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[4] = 1
     comp.board.offense[8] = -1
@@ -788,7 +840,8 @@ test('Attack cross 4', () => {
 test('Attack cross 5', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
 
     comp.board.offense[4] = 1
     comp.board.offense[8] = -1
@@ -831,7 +884,7 @@ test('Attack cross 5', () => {
 test('Attack cross 6', () => {
     const eventsP = new EventEmitter()
 
-    const comp = new Computer(0, eventsP)
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
 
     comp.board.offense[4] = 1
     comp.board.offense[8] = -1

@@ -25,10 +25,10 @@ export default class Computer extends Player {
         const targets = []
 
         for (let i = 0; i < boardLength ** 2; i++) {
-            if (this.board.offense[i] === 0) { // 1 is a miss, -1 is a sunken square
+            if (this.board.offense[i] === 0) { // on offense 1 is a miss, 2 is a hit, -1 is a sunken square; on defense 1 is occupied, 2 is a hit, 3 is a miss
                 available.push(i) // find available targets
             } else if (this.board.offense[i] >= 2) {
-                hits.push(i) // find previous hits on unsunken shits
+                hits.push(i) // find previous hits on unsunken ships
             }
         }
 
@@ -228,16 +228,20 @@ export default class Computer extends Player {
             const valid = [] // squares adjacent to generated target who indicate that a ship fits in that direction
 
             while (valid.length === 0) {
-                const target = available[randomInt(0, available[available.length - 1])]
+                const index = randomInt(0, available.length)
+                const target = available[index]
+                console.log('generated random target:', target)
 
-                let mod = (target - (target % boardLength)) + boardLength
+                // let mod = (target - (target % boardLength)) + boardLength
 
-                let left = (target - 1) >= (mod - boardLength) ? target - 1 : null // prevent wrapping
-                let right = (target + 1) < mod ? target + 1 : null
+                // let left = target - 1) >= (mod - boardLength) ? target - 1 : target // prevent wrapping
+                let left = target - 1
+                // let right = (target + 1) < mod ? target + 1 : target
+                let right = target + 1
                 let top = target - boardLength
                 let bottom = target + boardLength
 
-                while (available.includes(left)) { // how much free space to left? prefer left, then right
+                while (available.includes(left) && left !== target) { // LEFT - how much free space to left? prefer left, then right
                     left -= 1
 
                     if (!available.includes(left)) { // found end of free space on left
@@ -258,8 +262,8 @@ export default class Computer extends Player {
                         }
                     }
                 }
-                if (valid.length === 0) { // preferred left but was none, now check right -- can only get here if there was no valid target to left
-                    while (available.includes(right)) {
+                if (valid.length === 0) { // RIGHT - preferred left but was none, now check right -- can only get here if there was no valid target to left
+                    while (available.includes(right) && right !== target) {
                         right += 1
                     }
                     if ((right - left) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
@@ -267,7 +271,7 @@ export default class Computer extends Player {
                             valid.push(target + 1)
                         }
                     }
-                    if (valid.length === 0) { // prefer left, then right, then top -- can only get here if there was no valid target to left or right
+                    if (valid.length === 0) { // TOP - prefer left, then right, then top -- can only get here if there was no valid target to left or right
                         while (available.includes(top)) {
                             top -= boardLength
 
@@ -289,7 +293,7 @@ export default class Computer extends Player {
                                 }
                             }
                         }
-                        if (valid.length === 0) { // prefer left, then right, then top, finally bottom if none else
+                        if (valid.length === 0) { // BOTTOM -- prefer left, then right, then top, finally bottom if none else
                             while (available.includes(bottom)) {
                                 bottom += boardLength
                             }
@@ -303,10 +307,16 @@ export default class Computer extends Player {
                     }
                 }
                 if (valid.length === 1) {
-                    console.log('C generated target:', target)
+                    console.log('C generated target:')
                     this.attack(target) // isolated hit square had valid targets adjacent
                 } else {
-                    console.log("Computer generated target didn't have space to fit smallest ship! Trying again with new target.")
+                    available.splice(index, 1)
+
+                    if (available.length === 0) {
+                        throw Error("Computer couldn't find valid target to generate, all available spaces invalid.")
+                    } else {
+                        console.log("Computer generated target didn't have space to fit smallest ship! Trying again with new target.")
+                    }
                 }
             }
             // write logic to find most isolated square using adjacency list, target being the node w/ most free adjacents
