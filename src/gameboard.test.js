@@ -5,7 +5,7 @@ board.quantity = 8
 board.boatMax = 6 // default 6
 board.boatMin = 3 // default 3
 
-test.only('Place horizontal boat', () => {
+test('Place horizontal boat', () => {
     const board = new Gameboard(8)
 
     expect(board.place([0,1,2,3,4,5])).toBeTruthy()

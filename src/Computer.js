@@ -12,13 +12,14 @@ export default class Computer extends Player {
         const boardLength = this.board.length
 
         const alive = []
-        for (let ship of this.ships) {
+        for (let ship of this.enemyShips) {
             if (ship.sunk === false) {
                 alive.push(ship)
             }
         }
         const shipMin = alive[0].length
         const shipMax = alive[alive.length - 1].length
+        console.log('alive,sMin,sMax',alive,shipMin,shipMax)
 
         const available = [] // available targets, i.e., never been attacked before
         let hits = [] // squares that have been attacked but not sunk
@@ -190,37 +191,43 @@ export default class Computer extends Player {
 
             if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
                 let mod = hit - (hit % boardLength)
+                console.log('mod', mod)
 
                 let left = hit - 1
                 let endL = left
                 while (available.includes(endL) && endL >= mod) {
                     endL -= 1
                 }
+                console.log('l,endl',left,endL)
 
                 let right = hit + 1
                 let endR = right
                 while (available.includes(endR) && endR < mod + boardLength) {
                     endR += 1
                 }
+                console.log('r,endR',right,endR)
 
-                if ((endR - endL) - 1 >= shipMin) {
+                if ((endR - endL) - 1 >= shipMin) { // try horizontal
                     if (available.includes(left)) {
                         targets.push(left)
                     } else if (available.includes(right)) {
                         targets.push(right)
                     }
-                } else {
+                }
+                if (targets.length === 0) { // didn't work? now try vertical
                     let top = hit - boardLength
                     let endT = top
                     while (available.includes(endT) && endT >= 0) {
                         endT -= boardLength
                     }
+                    console.log('t,endT',top,endT)
 
                     let bottom = hit + boardLength
                     let endB = bottom
                     while (available.includes(endB) && endB < (boardLength ** 2)) {
                         endB += boardLength
                     }
+                    console.log('b,endB',bottom,endB)
 
                     if (((endB - endT) / boardLength) - 1 >= shipMin) {
                         if (available.includes(top)) {
@@ -299,12 +306,12 @@ export default class Computer extends Player {
 
                     this.attack(target) // isolated hit square had valid targets adjacent
                 } else {
-                    available.splice(index, 1)
+                    available.splice(index, 1) // this gets reset every new attack generation, so no need to worry about creating bugs between attacks
 
                     if (available.length === 0) {
                         throw Error("Computer couldn't find valid target to generate, all available spaces invalid.")
                     } else {
-                        // this.board.offense[target] = -2 // mark as an invalid square so we don't have to recheck later
+                        // this.board.offense[target] = -2 // mark as an invalid square so we don't have to recheck later -- this would almost certainly create bugs
 
                         console.log("Computer generated target didn't have space to fit smallest ship! Trying again with new target.")
                     }

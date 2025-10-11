@@ -21,12 +21,15 @@ export default class Player {
         }
 
         this.ships = []
+        this.enemyShips = []
         for (let length of gameSettings.shipLengths) {
             const ship = new Ship(length)
+            const enemyShip = new Ship(length)
 
             ship.events.on('Sunk', this.scuttle.bind(this))
 
             this.ships.push(ship)
+            this.enemyShips.push(enemyShip)
         }
         this.survivors = this.ships.length
         this.dead = []
@@ -182,7 +185,7 @@ export default class Player {
         }
     }
 
-    markMiss(square) {
+    markMiss(square) { // mark miss on offense board, i.e., you hit an enemy ship
         // console.log('markmiss', square, this)
 
         if (this.board.offense[square] >= 0) {
@@ -192,12 +195,15 @@ export default class Player {
         }
     }
 
-    markSink(ship) {
-        // console.log('marsink', ship, this)
+    markSink(ship) { // mark sink on offense board, i.e., you sank an enemy ship
+        console.log('marksink', ship, this)
 
         ship.pos.forEach((square) => {
             this.board.offense[square] = -1
         })
+
+        const enemyShip = this.enemyShips.find((enemyShip) => enemyShip.length === ship.length)
+        enemyShip.sunk = true
     }
 
     scuttle(ship) {

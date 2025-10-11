@@ -161,7 +161,7 @@ test('Attack triple of hits', () => {
     expect([8,12]).toContain(listener.mock.calls[0][0])
 })
 
-test.only('Attack quadruple of hits', () => {
+test('Attack quadruple of hits', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
