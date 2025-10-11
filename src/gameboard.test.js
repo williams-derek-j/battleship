@@ -5,7 +5,7 @@ board.quantity = 8
 board.boatMax = 6 // default 6
 board.boatMin = 3 // default 3
 
-test('Place horizontal boat', () => {
+test.only('Place horizontal boat', () => {
     const board = new Gameboard(8)
 
     expect(board.place([0,1,2,3,4,5])).toBeTruthy()
@@ -17,7 +17,7 @@ test('Place vertical boat', () => {
     expect(board.place([9,17,25,33,41,49])).toBeTruthy()
 })
 
-test.skip('Place reversed vertical boat', () => {
+test('Place reversed vertical boat', () => {
     const board = new Gameboard(8)
 
     expect(board.place([47,39,31,23])).toBeTruthy()

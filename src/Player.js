@@ -16,6 +16,10 @@ export default class Player {
 
         this.allShipsPlaced = false
 
+        if (gameSettings.shipLengths[gameSettings.shipLengths - 1] < gameSettings.shipLengths[0]) {
+            gameSettings.shipLengths = [...gameSettings.shipLengths].reverse();
+        }
+
         this.ships = []
         for (let length of gameSettings.shipLengths) {
             const ship = new Ship(length)

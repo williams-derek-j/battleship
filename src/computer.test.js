@@ -1,7 +1,7 @@
 import EventEmitter from './Events'
 import Computer from './Computer'
 
-test.only('Place ships', () => {
+test('Place ships', () => {
     const eventsP = new EventEmitter()
 
     const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6,7,8] })
@@ -159,6 +159,34 @@ test('Attack triple of hits', () => {
 
     expect(listener).toHaveBeenCalled()
     expect([8,12]).toContain(listener.mock.calls[0][0])
+})
+
+test.only('Attack quadruple of hits', () => {
+    const eventsP = new EventEmitter()
+
+    const comp = new Computer(0, eventsP, { playerCount: 2, boardLength: 8, shipsPerPlayer: 4, shipLengths: [3,4,5,6] })
+
+    comp.board.offense[52] = 2
+    comp.board.offense[53] = 2
+    comp.board.offense[54] = 2
+    comp.board.offense[55] = 2
+
+    // [   0_,_,_,_,_,_,_,_,8
+    //     8_,_,_,_,_,_,_,_,16
+    //     16_,_,_,_,_,_,_,_,24
+    //     24_,_,_,_,_,_,_,_,32
+    //     32_,_,_,_,_,_,_,_,40
+    //     40_,_,_,_,_,_,_,_,48
+    //     48_,_,_,X,H,H,H,H,56
+    //     56_,_,_,_,_,_,_,_,64  ]
+
+    const listener = jest.fn()
+    comp.eventsP.on('Attack', listener)
+
+    comp.generateAttack()
+
+    expect(listener).toHaveBeenCalled()
+    expect([51]).toContain(listener.mock.calls[0][0])
 })
 
 test('Attack vertical triple of hits', () => {

@@ -8,6 +8,9 @@ export default class Game {
         if (Object.keys(settings).length !== 3) {
             throw Error('Missing one or more required game settings!')
         }
+        if (settings.shipLengths[settings.shipLengths - 1] < settings.shipLengths[0]) {
+            settings.shipLengths = [...settings.shipLengths].reverse()
+        }
 
         this.container = container
         this.events = new EventEmitter()

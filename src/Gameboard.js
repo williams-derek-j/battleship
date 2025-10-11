@@ -227,6 +227,8 @@ export default class Gameboard {
     place(array) { // square is a decimal, 0 through board.length ** 2
         if (array.length === 0) {
             return false
+        } else if (array[array.length - 1] < array[0]) {
+            array = [...array].reverse()
         }
         const boardLength = this.length
         const board = this.defense
