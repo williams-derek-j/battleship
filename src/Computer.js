@@ -41,10 +41,10 @@ export default class Computer extends Player {
                 for (let hit of hits) { // building adjacency list of contiguous hits
                     const adjacents = []
 
-                    let mod = (hit - (hit % boardLength)) + boardLength
+                    let mod = hit - (hit % boardLength)
 
-                    let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
-                    let right = (hit + 1) < mod ? hit + 1 : null
+                    let left = (hit - 1) >= mod ? hit - 1 : null // prevent wrapping
+                    let right = (hit + 1) < mod + boardLength ? hit + 1 : null
                     let top = hit - boardLength
                     let bottom = hit + boardLength
 
@@ -82,8 +82,7 @@ export default class Computer extends Player {
 
                     hitMap[hit] = adjacents
                 }
-
-                console.log('hM',hitMap)
+                // console.log('hitMap',hitMap)
 
                 let current = Object.keys(hitMap)[0]
                 for (let hit in hitMap) {
@@ -92,34 +91,40 @@ export default class Computer extends Player {
                     }
                 }
                 hit = Number(current)
-                console.log('hit', hit, typeof hit, hits.indexOf(hit))
 
                 const horizontal = [...hitMap[hit][0], Number(hit), ...hitMap[hit][1]] // left, hit, right
                 const vertical = [...hitMap[hit][2], Number(hit), ...hitMap[hit][3]] // top, hit, bottom
-                console.log('h,v',horizontal,vertical)
 
                 if (horizontal.length >= vertical.length) {
-                    console.log('checking horiz')
+                    // console.log('horiz', horizontal, 'available', available)
+
                     let mostL = horizontal[0] // most left hit
+
                     let mod = mostL - (mostL % boardLength)
-                    let adjL = mostL - 1 >= mod ? mostL - 1 : null // ternary check prevents wrapping
-                    let endL = adjL === null ? mostL : adjL
-                    while (available.includes(endL && endL > mod)) {
+
+                    let adjL = mostL - 1 >= mod ? mostL - 1 : null // available square to left of horizontal chain or null, ternary check prevents wrapping
+                    let endL = mostL - 1 // first unavailable square to left or end of grid/wrapped to previous row (intentionally, still works for space calculation)
+                    while (available.includes(endL) && endL >= mod) {
                         endL -= 1
                     }
-                    console.log('l,m,adjL,eL',mostL,mod,adjL,endL)
+
+                    // console.log('l,adjl,endl',mostL,adjL,endL)
 
                     let mostR = horizontal[horizontal.length - 1] // most right hit
-                    let adjR = mostR + 1 < mod + boardLength ? mostR + 1 : null
-                    let endR = adjR
-                    while (available.includes(endR && endR < mod + boardLength)) {
+                    let adjR = mostR + 1 < mod + boardLength ? mostR + 1 : null  // available square to right of horizontal chain or null, ternary check prevents wrapping
+                    let endR = mostR + 1 // first unavailable square to right or end of grid/wrapped to next row (intentionally, still works for space calculation)
+                    while (available.includes(endR) && endR < mod + boardLength) {
                         endR += 1
                     }
-                    console.log('r,adjr,endR',mostR,adjR,endR)
+
+                    // console.log('r,adjr,endr',mostR,adjR,endR)
+
+                    const space = (endR - endL) - 1
+
+                    // console.log('space', space)
 
                     if (available.includes(adjL)) {
-                        const newLen = (mostR - adjL) + 1 // or right + 1
-                        const space = (mostR - endL) + 1
+                        const newLen = (mostR - adjL) + 1
 
                         if (newLen <= shipMax && space >= shipMin) { // for edge case, would line of hits + 1 be less than the longest length of surviving enemy ships?
                             targets.push(adjL)
@@ -127,7 +132,6 @@ export default class Computer extends Player {
                     } else { // prefer left, could rewrite to randomly pick left or right
                         if (available.includes(adjR)) {
                             const newLen = (adjR - mostL) + 1
-                            const space = (endR - mostL) + 1
 
                             if (newLen <= shipMax && space >= shipMin) {
                                 targets.push(adjR)
@@ -136,104 +140,84 @@ export default class Computer extends Player {
                     }
                 }
                 if (targets.length === 0) { // horizontal might have been longer but had no available targets
-                    console.log('checking vert')
-                    let top = vertical[0]
-                    let adjT = top - boardLength
-                    let bottom =  vertical[vertical.length - 1]
-                    let adjB = bottom + boardLength
-                    console.log('top,adjt,bottom,adjB',top,adjT,bottom,adjB)
-                    console.log('hi', ((bottom - adjT) / boardLength) + 1, ((adjB - top) / boardLength) + 1)
+                    // console.log('vert', vertical, 'available', available)
+
+                    let mostT = vertical[0] // top of chain of hits
+                    let adjT = mostT - boardLength // available square above top of chain or null
+                    let endT = mostT - boardLength // first unavailable square or end of grid + 1
+                    while (available.includes(endT) && endT >= 0) {
+                        endT -= boardLength
+                    }
+                    // console.log('t,adjt,endT',mostT,adjT,endT)
+
+                    let mostB =  vertical[vertical.length - 1] // bottom of chain of hits
+                    let adjB = mostB + boardLength // available square below below of chain or null
+                    let endB = mostB + boardLength // first unavailable square or end of grid + 1
+                    while (available.includes(endB) && endB <= (boardLength ** 2)) {
+                        endB += boardLength
+                    }
+                    // console.log('b,mostb,endb',mostB,adjB,endB)
+
+                    const space = ((endB - endT) / boardLength) - 1
+                    // console.log('space', space)
 
                     if (available.includes(adjT)) {
-                        const space = ((bottom - adjT) / boardLength) + 1
-                        if (space <= shipMax) {
+                        const newLen = ((mostB - adjT) / boardLength) + 1
+
+                        if (newLen <= shipMax && space >= shipMin) {
                             targets.push(adjT)
                         }
                     } else { // prefer top
                         if (available.includes(adjB)) {
-                            const space = ((adjB - top) / boardLength) + 1
-                            console.log('yo', adjB)
-                            if (space <= shipMax) {
+                            const newLen = ((adjB - mostT) / boardLength) + 1
+
+                            if (newLen <= shipMax && space >= shipMin) {
                                 targets.push(adjB)
                             }
-                            console.log(targets, (adjB - top) / boardLength)
                         }
                     }
                 }
             }
 
             if (targets.length === 0) { // hit square was isolated or had no valid targets along chain
-                // let mod = (hit - (hit % boardLength)) + boardLength
+                let mod = hit - (hit % boardLength)
 
-                // let left = (hit - 1) >= (mod - boardLength) ? hit - 1 : null // prevent wrapping
                 let left = hit - 1
-                // let right = (hit + 1) < mod ? hit + 1 : null
-                let right = hit + 1
-                let top = hit - boardLength
-                let bottom = hit + boardLength
-
-                while (available.includes(left)) { // LEFT -- how much free space to left?
-                    left -= 1
-
-                    if (!available.includes(left)) { // found end of free space on left
-                        if (!available.includes(right)) { // found end of free space on right -- there was none
-                            if ((right - left) - 1 >= shipMin) {
-                                targets.push(hit - 1) // no free space on right but enough on left to fit smallest ship, therefore 1 square left of hit is valid target
-                            }
-                        } else {
-                            while (available.includes(right)) { // find free space on right
-                                right += 1
-
-                                if (!available.includes(right)) { // found end of free space on both sides
-                                    if ((right - left) - 1 >= shipMin) { // amount of space can fit smallest ship? -- right and left are unavailable spaces, so don't + 1,  actually - 1
-                                        targets.push(hit - 1) // if so, square is valid target
-                                    }
-                                }
-                            }
-                        }
-                    }
+                let endL = left
+                while (available.includes(endL) && endL >= mod) {
+                    endL -= 1
                 }
-                if (targets.length === 0) { // RIGHT -- prefer left, then right -- can only get here if there was no valid target to left
-                    while (available.includes(right)) {
-                        right += 1
+
+                let right = hit + 1
+                let endR = right
+                while (available.includes(endR) && endR <= mod + boardLength) {
+                    endR += 1
+                }
+
+                if ((endR - endL) - 1 >= shipMin) {
+                    if (available.includes(left)) {
+                        targets.push(left)
+                    } else if (available.includes(right)) {
+                        targets.push(right)
                     }
-                    if ((right - left) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
-                        if (available.includes(hit + 1)) {
-                            targets.push(hit + 1)
-                        }
+                } else {
+                    let top = hit - boardLength
+                    let endT = top
+                    while (available.includes(endT) && endT >= 0) {
+                        endT -= boardLength
                     }
-                    if (targets.length === 0) { // TOP -- prefer left, then right, then top -- can only get here if there was no valid target to left or right
-                        while (available.includes(top)) {
-                            top -= boardLength
 
-                            if (!available.includes(top)) { // found end of free space on top
-                                if (!available.includes(bottom)) { // found end of free space on bottom -- there was none
-                                    if (((bottom - top) / boardLength) - 1 >= shipMin) {
-                                        targets.push(hit - boardLength) // no free space on right but enough on left to fit smallest ship, therefore 1 square above hit is valid target
-                                    }
-                                } else {
-                                    while (available.includes(bottom)) { // find free space on bottom
-                                        bottom += boardLength
+                    let bottom = hit + boardLength
+                    let endB = bottom
+                    while (available.includes(endB) && endB <= (boardLength ** 2)) {
+                        endB += boardLength
+                    }
 
-                                        if (!available.includes(bottom)) { // found end of free space on both sides
-                                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // amount of space can fit smallest ship? -- top and bottom are unavailable spaces, so don't + 1,  actually - 1
-                                                targets.push(hit -  boardLength) // if so, square is valid target
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (targets.length === 0) { // BOTTOM -- prefer left, then right, then top, finally bottom if none else
-                            while (available.includes(bottom)) {
-                                bottom += boardLength
-                            }
-
-                            if (((bottom - top) / boardLength) - 1 >= shipMin) { // bottom and top are both unavailable, so count squares between
-                                if (available.includes(hit + boardLength)) {
-                                    targets.push(hit + boardLength)
-                                }
-                            }
+                    if (((endB - endT) / boardLength) - 1 >= shipMin) {
+                        if (available.includes(top)) {
+                            targets.push(top)
+                        } else if (available.includes(bottom)) {
+                            targets.push(bottom)
                         }
                     }
                 }
@@ -245,7 +229,7 @@ export default class Computer extends Player {
                 }
             } else if (targets.length === 1) {
                 console.log('B generated target:', targets[0])
-                this.attack(targets[0]) // chain of hits had valid targets adjacent
+                this.attack(targets[0]) // chain of hits can't not have valid targets when it gets to the else if above, if it did it would end up in the A scope for isolated hit square
             } else {
                throw Error('chain of hits somehow had more than 1 valid adjacent target assigned, something is wrong w/ logic')
             }
