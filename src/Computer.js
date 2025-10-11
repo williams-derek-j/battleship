@@ -309,10 +309,6 @@ export default class Computer extends Player {
         const coords = []
 
         let mod = square - (square % boardLength) // e.g., 0 w/ boardL of 8
-        // let modH = square + boardLength // e.g., 7 w/ boardL of 8
-        // if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
-        //     square -= ship.length - ((mod + boardLength) - square)
-        // }
 
         if ((mod + boardLength) - square < len) { // not enough space on right?
             if (square - (mod - 1) < len) { // not enough space on left?
@@ -332,20 +328,18 @@ export default class Computer extends Player {
 
                 if (available.includes(adjacent)) {
                     coords.push(adjacent)
+                } else {
+                    break
                 }
             } else {
                 const adjacent = square - i
 
                 if (available.includes(adjacent)) {
                     coords.push(adjacent)
+                } else {
+                    break
                 }
             }
-
-            // if (!available.includes(adjacent)) {
-            //     return []
-            // } else {
-            //     coords.push(adjacent)
-            // }
         }
 
         if (coords.length === len) {
@@ -356,7 +350,6 @@ export default class Computer extends Player {
             }
         } else {
             return []
-            // throw Error("Generated array didn't match ship length!")
         }
     }
 
@@ -387,12 +380,16 @@ export default class Computer extends Player {
 
                 if (available.includes(adjacent)) {
                     coords.push(adjacent)
+                } else {
+                    break
                 }
             } else {
                 const adjacent = square - i
 
                 if (available.includes(adjacent)) {
                     coords.push(adjacent)
+                } else {
+                    break
                 }
             }
         }
@@ -415,9 +412,14 @@ export default class Computer extends Player {
         for (let i = 0; i < boardLength ** 2; i++) {
             available.push(i)
         }
+        const possible = [...available]
+
+        if (this.ships[this.ships.length - 1].length > this.ships[0].length) { // place longest ship first, more efficient and otherwise might introduce bug with not having room left for longest ships
+            this.ships = this.ships.reverse()
+        }
 
         for (let ship of this.ships) {
-            // console.log('available remaining:',available.length)
+            // console.log('available remaining:',available.length,'-- possible remaining',possible.length)
 
             function randomInt(min, max) {
                 return Math.floor(Math.random() * (max - min)) + min;
@@ -428,7 +430,7 @@ export default class Computer extends Player {
                 let coords = []
 
                 let index = randomInt(0, available.length - 1)
-                let square = available[index]
+                let square = possible[index]
                 // console.log('square',square)
 
                 let vertical
@@ -454,11 +456,13 @@ export default class Computer extends Player {
                     if (result) {
                         for (const square of coords) {
                             available.splice(available.indexOf(square), 1)
+                            possible.splice(possible.indexOf(square), 1)
                         }
                         break
                     }
                 } else {
-                    // console.log('recheck')
+                    possible.splice(possible.indexOf(square), 1)
+                    // console.log('recheck', square, possible)
                 }
             }
         }

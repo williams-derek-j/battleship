@@ -15,7 +15,6 @@ export default class Game {
         this.players = []
         this.survivors = []
         for (let i = 1; i <= settings.playerCount; i++) {
-            console.log('i',i)
             const player = new Player(i, this.events, settings, `Player${i}`);
 
             player.events.on('Hit received', this.sendHit.bind(this))
