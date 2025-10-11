@@ -304,98 +304,161 @@ export default class Computer extends Player {
         }
     }
 
-    generateHorizontal(square, ship) {
+    generateHorizontal(square, len, available, reversed = false) {
         const boardLength = this.board.length
         const coords = []
 
-        let mod = square - (square % boardLength)
-        if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
-            square -= ship.length - ((mod + boardLength) - square)
+        let mod = square - (square % boardLength) // e.g., 0 w/ boardL of 8
+        // let modH = square + boardLength // e.g., 7 w/ boardL of 8
+        // if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
+        //     square -= ship.length - ((mod + boardLength) - square)
+        // }
+
+        if ((mod + boardLength) - square < len) { // not enough space on right?
+            if (square - (mod - 1) < len) { // not enough space on left?
+                return []
+            } else {
+                reversed = true
+            }
+        } else {
+            reversed = false
         }
 
         coords.push(square)
 
-        for (let i = 1; i < ship.length; i++) {
-            const adjacent = square + i
-            coords.push(adjacent)
+        for (let i = 1; i < len; i++) {
+            if (!reversed) {
+                const adjacent = square + i
+
+                if (available.includes(adjacent)) {
+                    coords.push(adjacent)
+                }
+            } else {
+                const adjacent = square - i
+
+                if (available.includes(adjacent)) {
+                    coords.push(adjacent)
+                }
+            }
+
+            // if (!available.includes(adjacent)) {
+            //     return []
+            // } else {
+            //     coords.push(adjacent)
+            // }
         }
 
-        return coords
+        if (coords.length === len) {
+            if (!reversed) {
+                return coords
+            } else {
+                return coords.reverse()
+            }
+        } else {
+            return []
+            // throw Error("Generated array didn't match ship length!")
+        }
     }
 
-    generateVertical(square, ship) {
+    generateVertical(square, len, available, reversed = false) {
         const boardLength = this.board.length
         const coords = []
 
-        coords.push(square)
+        const mod = square - (square % boardLength) // e.g., 0 w/ boardL of 8
+        const modH = (mod + boardLength) - 1 // e.g., 7 w/ boardL of 8
 
-        for (let i = boardLength; i <= (ship.length - 1) * boardLength; i += boardLength) {
-            const adjacent = square + i
-            coords.push(adjacent)
+        const max = (boardLength ** 2) - 1
+
+        if (((max - modH) / boardLength) < len) { // enough space on bottom?
+            if ((mod / boardLength) + 1 < len) { // enough space on top?
+                return []
+            } else {
+                reversed = true
+            }
+        } else {
+            reversed = false
         }
 
-        return coords
+        coords.push(square)
+
+        for (let i = boardLength; i <= (len - 1) * boardLength; i += boardLength) {
+            if (!reversed) {
+                const adjacent = square + i
+
+                if (available.includes(adjacent)) {
+                    coords.push(adjacent)
+                }
+            } else {
+                const adjacent = square - i
+
+                if (available.includes(adjacent)) {
+                    coords.push(adjacent)
+                }
+            }
+        }
+
+        if (coords.length === len) {
+            if (!reversed) {
+                return coords
+            } else {
+                return coords.reverse()
+            }
+        } else {
+            return []
+        }
     }
 
     placeShips() { // generate a random placement for ships
         const boardLength = this.board.length
-        let coords = []
-        let exhausted = false
+
+        const available = []
+        for (let i = 0; i < boardLength ** 2; i++) {
+            available.push(i)
+        }
 
         for (let ship of this.ships) {
+            // console.log('available remaining:',available.length)
+
             function randomInt(min, max) {
                 return Math.floor(Math.random() * (max - min)) + min;
             }
+            const len = ship.length
 
-            let vertical, square
-            if (randomInt(0, 2) === 0) { // generate 50/50 chance
-                vertical = true
+            while (true) {
+                let coords = []
 
-                square = randomInt(0, (boardLength ** 2) - ((ship.length - 1) * boardLength))
-                coords = this.generateVertical(square, ship)
-            } else {
-                vertical = false
+                let index = randomInt(0, available.length - 1)
+                let square = available[index]
+                // console.log('square',square)
 
-                square = randomInt(0, boardLength ** 2)
+                let vertical
+                vertical = randomInt(0, 2) === 0;
+                // console.log('vertical',vertical)
 
-                let mod = square - (square % boardLength)
-                if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
-                    square -= ship.length - ((mod + boardLength) - square) // check this again (mod + boardLength) - square was mod - square
+                if (!vertical) {
+                    coords = this.generateHorizontal(square, len, available)
+                    if (coords.length === 0) {
+                        coords = this.generateVertical(square, len, available)
+                    }
+                } else {
+                    coords = this.generateVertical(square, len, available)
+                    if (coords.length === 0) {
+                        coords = this.generateHorizontal(square, len, available)
+                    }
                 }
 
-                coords = this.generateHorizontal(square, ship)
-            }
+                // console.log('coords gen',coords)
+                if (coords.length === len) {
+                    const result = this.place(coords)
 
-            while (this.place(coords) !== true) { // Try first orientation (i.e., vertical or horizontal). If didn't have room, try second. Still doesn't fit? Generate new square.
-                if (vertical && !exhausted) {
-                    exhausted = true
-                    vertical = false
-
-                    coords = this.generateHorizontal(square, ship)
-                } else if (!vertical && !exhausted) {
-                    exhausted = true
-                    vertical = true
-
-                    let mod = square - (square % boardLength)
-                    if ((mod + boardLength) - square < ship.length) { // num is too far right on board, no space for ship
-                        square -= ship.length - (mod - square)
+                    if (result) {
+                        for (const square of coords) {
+                            available.splice(available.indexOf(square), 1)
+                        }
+                        break
                     }
-
-                    coords = this.generateVertical(square, ship)
                 } else {
-                    if (randomInt(0, 2) === 0) { // 50/50 chance to decide horizontal or vertical ship placement
-                        vertical = true
-                        exhausted = false
-
-                        square = randomInt(0, (boardLength ** 2) - ((ship.length - 1) * boardLength))
-                        coords = this.generateVertical(square, ship)
-                    } else {
-                        vertical = false
-                        exhausted = false
-
-                        square = randomInt(0, boardLength ** 2)
-                        coords = this.generateHorizontal(square, ship)
-                    }
+                    // console.log('recheck')
                 }
             }
         }

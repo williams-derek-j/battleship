@@ -1,4 +1,3 @@
-import Player from './Player'
 import Gameboard from './gameboard.js';
 
 const board = new Gameboard(64)
@@ -16,6 +15,12 @@ test('Place vertical boat', () => {
     const board = new Gameboard(8)
 
     expect(board.place([9,17,25,33,41,49])).toBeTruthy()
+})
+
+test.skip('Place reversed vertical boat', () => {
+    const board = new Gameboard(8)
+
+    expect(board.place([47,39,31,23])).toBeTruthy()
 })
 
 test('Place invalid disjointed boat', () => {
