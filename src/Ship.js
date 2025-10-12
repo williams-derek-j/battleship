@@ -46,12 +46,14 @@ export default class Ship {
             }
             renderX.classList.add('ship')
             renderX.classList.add(`len${this.length}`)
+            renderX.classList.add('placeable')
             if (this.vertical) {
                 renderX.classList.add(`vertical`)
             }
             if (this.reversed) {
                 renderX.classList.add(`reversed`)
             }
+            renderX.draggable = true
 
             if (this.pos.length === 0) {
                 renderX.addEventListener('dragstart', (event) => {

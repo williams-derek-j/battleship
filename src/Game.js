@@ -76,8 +76,8 @@ export default class Game {
             } else {
                 if (player.isReal === true) {
                     this.events.on('Attack', (square) => {
-                        let boardLength = player.board.length
-                        let mod = square - (square % boardLength)
+                        const boardLength = player.board.length
+                        const mod = square - (square % boardLength)
                         const lastMod = boardLength * (boardLength - 1)
 
                         const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
@@ -114,6 +114,7 @@ export default class Game {
             if (player.isReal === true) {
                 while (this.container.firstChild) {
                     console.log('clearing container')
+
                     this.container.removeChild(this.container.lastChild)
                 }
 

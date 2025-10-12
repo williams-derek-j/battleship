@@ -207,12 +207,17 @@ export default class Player {
     }
 
     scuttle(ship) {
-        // console.log('scuttle', this, ship, this.survivors)
+        console.log('scuttle', this, ship)
 
         this.survivors -= 1
 
         ship.sunk = true
         this.dead.push(ship)
+
+        const square = ship.pos[0]
+        for (let i = 0; i < ship.length; i++) { // mark sink on defense DOM
+            this.board.defense[square + i] = -1
+        }
 
         this.events.emit('Sunk', { ship: ship, player: this })
 
@@ -224,3 +229,11 @@ export default class Player {
         }
     }
 }
+
+// const square = ship.pos[0]
+// const boardLength = this.board.length
+// const mod = square - (square % boardLength)
+// const lastMod = boardLength * (boardLength - 1)
+//
+// const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
+// const column = square - mod

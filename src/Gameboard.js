@@ -45,6 +45,44 @@ export default class Gameboard {
                         if (callback !== undefined) { // initial render for ship placement
                             square.addEventListener('dragover', (event) => {
                                 event.preventDefault()
+
+                                // const dragged = JSON.parse(event.dataTransfer.getData('text'))
+                                // const len = dragged.length
+                                // const vertical = dragged.vertical
+                                // const reversed = dragged.reversed
+
+                                square.classList.add('highlighted') // render selected square on DOM immediately
+
+                                // if (!vertical) {
+                                //     if (!reversed) {
+                                //         for (let k = 0; k < len; k++) {
+                                //             this.renderDefense[i][j + k].classList.add('highlighted')
+                                //         }
+                                //     } else {
+                                //         for (let k = 0; k < len; k++) {
+                                //             this.renderDefense[i][j - k].classList.add('highlighted')
+                                //         }
+                                //     }
+                                // } else {
+                                //     if (!reversed) {
+                                //         for (let k = 0; k < len; k++) {
+                                //             this.renderDefense[i + k][j].classList.add('highlighted')
+                                //         }
+                                //     } else {
+                                //         for (let k = 0; k < len; k++) {
+                                //             this.renderDefense[i - k][j].classList.add('highlighted')
+                                //         }
+                                //     }
+                                // }
+                            })
+                            square.addEventListener('dragleave', (event) => {
+                                event.preventDefault()
+
+                                const highlights = document.querySelectorAll('.highlighted')
+
+                                highlights.forEach(highlight => {
+                                    highlight.classList.remove('highlighted')
+                                })
                             })
                             square.addEventListener('drop', (event) => {
                                 event.preventDefault()
@@ -105,7 +143,7 @@ export default class Gameboard {
                                             }
                                         }
                                     } else if (vertical === true) { // vertical
-                                        let mod = array[0] - (array[0] % boardLength) // find index of square in row -- problem is here im sure
+                                        let mod = array[0] - (array[0] % boardLength) // find index of square in row
 
                                         const index = array[0] - mod
 

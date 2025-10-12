@@ -263,6 +263,10 @@ div.invalid {
     background-color: white;
 }
 
+.square.highlighted {
+    background-color: #cff000;
+}
+
 .square.occupied {
     background-color: darkgoldenrod;
 }
@@ -332,6 +336,10 @@ div.invalid {
     position: relative;
 
     background: linear-gradient(90deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(237, 221, 83, 1) 100%);
+}
+
+.ship.placeable {
+    cursor: move;
 }
 
 .ship.reversed.vertical {
