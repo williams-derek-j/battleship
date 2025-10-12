@@ -52,71 +52,163 @@ export default class Gameboard {
                                 const vertical = dragged.vertical
                                 const reversed = dragged.reversed
 
-                                if (boardLength - j >= len) {
-                                    square.classList.add('highlighted') // render selected square on DOM immediately
+                                let current = square
 
-                                    let current = square
+                                let valid = true
+                                let foundOccupied = false
 
+                                if (square.classList.contains('occupied')) {
+                                    valid = false
+                                }
+                                if (valid) {
                                     if (!vertical) {
                                         if (!reversed) {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.nextElementSibling
-                                                current.classList.add('highlighted')
+                                            if (boardLength - j >= len) {
+                                                square.classList.add('highlighted') // render selected square on DOM immediately
+
+                                                for (let k = 1; k < len; k++) {
+                                                    current = current.nextElementSibling
+
+                                                    if (!current.classList.contains('occupied')) {
+                                                        current.classList.add('highlighted')
+                                                    } else {
+                                                        valid = false
+                                                        foundOccupied = true
+                                                    }
+                                                }
+                                            } else {
+                                                valid = false
                                             }
                                         } else {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.previousElementSibling
-                                                current.classList.add('highlighted')
+                                            if (j + 1 >= len) {
+                                                square.classList.add('highlighted') // render selected square on DOM immediately
+
+                                                for (let k = 1; k < len; k++) {
+                                                    current = current.previousElementSibling
+
+                                                    if (!current.classList.contains('occupied')) {
+                                                        current.classList.add('highlighted')
+                                                    } else {
+                                                        valid = false
+                                                        foundOccupied = true
+                                                    }
+                                                }
+                                            } else {
+                                                valid = false
                                             }
                                         }
                                     } else {
                                         if (!reversed) {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.parentElement.nextElementSibling[j]
-                                                current.classList.add('highlighted')
+                                            if (boardLength - i >= len) {
+                                                square.classList.add('highlighted')
+
+                                                for (let k = 1; k < len; k++) {
+                                                    current = current.parentElement.nextElementSibling.children[j]
+
+                                                    if (!current.classList.contains('occupied')) {
+                                                        current.classList.add('highlighted')
+                                                    } else {
+                                                        valid = false
+                                                        foundOccupied = true
+                                                    }
+                                                }
+                                            } else {
+                                                valid = false
                                             }
                                         } else {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.parentElement.previousElementSibling[j]
-                                                current.classList.add('highlighted')
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    square.classList.add('invalidPlacement') // render selected square on DOM immediately
+                                            if (i + 1 >= len) {
+                                                square.classList.add('highlighted')
 
-                                    const short = boardLength - j
+                                                for (let k = 1; k < len; k++) {
+                                                    current = current.parentElement.previousElementSibling.children[j]
 
-                                    let current = square
-
-                                    if (!vertical) {
-                                        if (!reversed) {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.nextElementSibling
-                                                current.classList.add('invalidPlacement')
-                                            }
-                                        } else {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.previousElementSibling
-                                                current.classList.add('invalidPlacement')
-                                            }
-                                        }
-                                    } else {
-                                        if (!reversed) {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.parentElement.nextElementSibling[j]
-                                                current.classList.add('invalidPlacement')
-                                            }
-                                        } else {
-                                            for (let k = 1; k < len; k++) {
-                                                current = current.parentElement.previousElementSibling[j]
-                                                current.classList.add('invalidPlacement')
+                                                    if (!current.classList.contains('occupied')) {
+                                                        current.classList.add('highlighted')
+                                                    } else {
+                                                        valid = false
+                                                        foundOccupied = true
+                                                    }
+                                                }
+                                            } else {
+                                                valid = false
                                             }
                                         }
                                     }
                                 }
+                                if (valid === false) {
+                                    if (foundOccupied) {
+                                        const highlights = document.querySelectorAll('.square.highlighted')
 
-                                // square.dragging = false
+                                        highlights.forEach(highlight => {
+                                            highlight.classList.remove('highlighted')
+                                        })
+                                    }
+
+                                    square.classList.add('invalidPlacement') // render selected square on DOM immediately
+
+                                    let current = square
+
+                                    if (!vertical) {
+                                        if (!reversed) {
+                                            let lenShort = boardLength - j
+
+                                            for (let k = 1; k < lenShort; k++) {
+                                                current = current.nextElementSibling
+
+                                                if (!current.classList.contains('occupied')) {
+                                                    current.classList.add('invalidPlacement')
+                                                } else {
+                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                }
+                                            }
+                                        } else {
+                                            let lenShort = j + 1
+
+                                            for (let k = 1; k < lenShort; k++) {
+                                                current = current.previousElementSibling
+
+                                                if (!current.classList.contains('occupied')) {
+                                                    lenShort = len
+
+                                                    current.classList.add('invalidPlacement')
+                                                } else {
+                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        if (!reversed) {
+                                            let lenShort = boardLength - i
+
+                                            for (let k = 1; k < lenShort; k++) {
+                                                current = current.parentElement.nextElementSibling.children[j]
+
+                                                if (!current.classList.contains('occupied')) {
+                                                    lenShort = len
+
+                                                    current.classList.add('invalidPlacement')
+                                                } else {
+                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                }
+                                            }
+                                        } else {
+                                            let lenShort = i + 1
+
+                                            for (let k = 1; k < lenShort; k++) {
+                                                current = current.parentElement.previousElementSibling.children[j]
+
+                                                if (!current.classList.contains('occupied')) {
+                                                    lenShort = len
+
+                                                    current.classList.add('invalidPlacement')
+                                                } else {
+                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                // ship.dragging = false
                             })
                             square.addEventListener('dragleave', (event) => {
                                 event.preventDefault()
