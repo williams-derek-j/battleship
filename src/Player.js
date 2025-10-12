@@ -70,7 +70,7 @@ export default class Player {
                 renderX.append(button)
 
                 this.ships.forEach((ship) => {
-                    if (ship.pos.length === 0) { // check to make sure ship hasn't bene placed yet
+                    if (ship.pos.length === 0) { // check to make sure ship hasn't been placed yet -- why? how would it ever have been placed
                         ship.render = undefined
                         shipsContainer.appendChild(ship.render)
                     }
@@ -115,7 +115,7 @@ export default class Player {
 
         if (this.board.place(array) === true) { // if true, successful placement
             for (let ship of this.ships) {
-                if (ship.length === array.length) { // this is a weakness, can't have multiple ships of same length -- need a better way to identify ships, but would need ship drop event to transfer entire ship object
+                if (ship.length === array.length && ship.pos.length === 0) { // this is a weakness, can't have multiple ships of same length -- need a better way to identify ships, but would need ship drop event to transfer entire ship object
                     ship.pos = array
 
                     for (let ship of this.ships) { // Check for any unplaced ships

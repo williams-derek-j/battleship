@@ -1,4 +1,5 @@
 import sort from './sort'
+import disableClick from './disableClick'
 
 export default class Gameboard {
     constructor(length) {
@@ -162,6 +163,8 @@ export default class Gameboard {
     }
 
     set renderOffense(callback) {
+        document.removeEventListener('click', disableClick, true); // reset to allow clicking again
+
         if (callback !== null) {
             if (typeof callback !== 'function') {
                 if (callback === undefined) {
@@ -204,6 +207,8 @@ export default class Gameboard {
                         if (value === 0) {
                             square.addEventListener('click', (event) => {
                                 callback(index)
+
+                                document.addEventListener('click', disableClick, true) // disable clicking so multiple squares aren't clicked at once
                             })
                         }
                         row.append(square)
