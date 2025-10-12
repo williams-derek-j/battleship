@@ -52,7 +52,6 @@ export default class Player {
                 button.classList.add('rotate')
                 button.innerText = 'Rotate'
                 button.addEventListener('click', () => {
-                    console.log('click')
                     for (let shipRender of shipsContainer.children) {
                         shipRender.classList.toggle('vertical')
 

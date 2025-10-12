@@ -335,7 +335,7 @@ export default class InitGame {
 
         const submit = document.createElement('button')
         submit.id = 'gameSettingsFormSubmit'
-        submit.textContent = 'Submit'
+        submit.textContent = 'Start Game'
         submit.addEventListener('click', (event) => {
             event.preventDefault()
 

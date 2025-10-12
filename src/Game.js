@@ -80,7 +80,7 @@ export default class Game {
                         const mod = square - (square % boardLength)
                         const lastMod = boardLength * (boardLength - 1)
 
-                        const row = (boardLength - 1) - Math.floor((lastMod - mod) / 8)
+                        const row = (boardLength - 1) - Math.floor((lastMod - mod) / boardLength)
                         const column = square - mod
 
                         const render = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
