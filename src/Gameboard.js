@@ -168,8 +168,6 @@ export default class Gameboard {
                                                 current = current.previousElementSibling
 
                                                 if (!current.classList.contains('occupied')) {
-                                                    lenShort = len
-
                                                     current.classList.add('invalidPlacement')
                                                 } else {
                                                     lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
@@ -184,8 +182,6 @@ export default class Gameboard {
                                                 current = current.parentElement.nextElementSibling.children[j]
 
                                                 if (!current.classList.contains('occupied')) {
-                                                    lenShort = len
-
                                                     current.classList.add('invalidPlacement')
                                                 } else {
                                                     lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
@@ -198,8 +194,6 @@ export default class Gameboard {
                                                 current = current.parentElement.previousElementSibling.children[j]
 
                                                 if (!current.classList.contains('occupied')) {
-                                                    lenShort = len
-
                                                     current.classList.add('invalidPlacement')
                                                 } else {
                                                     lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
