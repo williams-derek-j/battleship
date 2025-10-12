@@ -150,53 +150,79 @@ export default class Gameboard {
 
                                     if (!vertical) {
                                         if (!reversed) {
-                                            let lenShort = boardLength - j
+                                            let lenShortened
 
-                                            for (let k = 1; k < lenShort; k++) {
+                                            if (!current.classList.contains('occupied')) {
+                                                lenShortened = boardLength - j
+                                            } else {
+                                                lenShortened = len
+                                            }
+
+                                            for (let k = 1; k < lenShortened; k++) {
                                                 current = current.nextElementSibling
+                                                current.classList.add('invalidPlacement')
 
-                                                if (!current.classList.contains('occupied')) {
-                                                    current.classList.add('invalidPlacement')
-                                                } else {
-                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                if (current.classList.contains('occupied')) {
+                                                    lenShortened = len // reconfigure length of for-loop, lenShortened is usually for off-grid calculation
                                                 }
                                             }
                                         } else {
-                                            let lenShort = j + 1
+                                            let lenShortened
 
-                                            for (let k = 1; k < lenShort; k++) {
+                                            if (!current.classList.contains('occupied')) {
+                                                lenShortened = j + 1
+                                            } else {
+                                                lenShortened = len
+                                            }
+
+                                            for (let k = 1; k < lenShortened; k++) {
                                                 current = current.previousElementSibling
 
                                                 if (!current.classList.contains('occupied')) {
                                                     current.classList.add('invalidPlacement')
                                                 } else {
-                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                    current.classList.add('invalidPlacement')
+                                                    lenShortened = len  // reconfigure length of for-loop, lenShortened is usually for off-grid calculation
                                                 }
                                             }
                                         }
                                     } else {
                                         if (!reversed) {
-                                            let lenShort = boardLength - i
+                                            let lenShortened
 
-                                            for (let k = 1; k < lenShort; k++) {
+                                            if (!current.classList.contains('occupied')) {
+                                                lenShortened = boardLength - i
+                                            } else {
+                                                lenShortened = len
+                                            }
+
+                                            for (let k = 1; k < lenShortened; k++) {
                                                 current = current.parentElement.nextElementSibling.children[j]
 
                                                 if (!current.classList.contains('occupied')) {
                                                     current.classList.add('invalidPlacement')
                                                 } else {
-                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                    current.classList.add('invalidPlacement')
+                                                    lenShortened = len  // reconfigure length of for-loop, lenShortened is usually for off-grid calculation
                                                 }
                                             }
                                         } else {
-                                            let lenShort = i + 1
+                                            let lenShortened
 
-                                            for (let k = 1; k < lenShort; k++) {
+                                            if (!current.classList.contains('occupied')) {
+                                                lenShortened = i + 1
+                                            } else {
+                                                lenShortened = len
+                                            }
+
+                                            for (let k = 1; k < lenShortened; k++) {
                                                 current = current.parentElement.previousElementSibling.children[j]
 
                                                 if (!current.classList.contains('occupied')) {
                                                     current.classList.add('invalidPlacement')
                                                 } else {
-                                                    lenShort = len  // reconfigure length of for-loop, lenShort is usually for off-grid calculation
+                                                    current.classList.add('invalidPlacement')
+                                                    lenShortened = len  // reconfigure length of for-loop, lenShortened is usually for off-grid calculation
                                                 }
                                             }
                                         }

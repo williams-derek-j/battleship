@@ -275,6 +275,10 @@ div.invalid {
     background-color: #f35976;
 }
 
+.square.occupied.invalidPlacement {
+    background-color: #760017;
+}
+
 .square.occupied {
     background-color: darkgoldenrod;
 }

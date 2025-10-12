@@ -65,6 +65,11 @@ export default class Ship {
                     // render.removeEventListener('dragstart', placeRender)
 
                     this.dragging = true
+
+                    const dragIcon = document.createElement('img');
+                    dragIcon.src = 'blank.png';
+                    dragIcon.width = 100;
+                    event.dataTransfer.setDragImage(dragIcon, -10, -10);
                 })
                 renderX.addEventListener('dragend', (event) => {
                     this.dragging = false

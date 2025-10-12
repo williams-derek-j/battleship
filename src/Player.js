@@ -52,6 +52,7 @@ export default class Player {
                 button.classList.add('rotate')
                 button.innerText = 'Rotate'
                 button.addEventListener('click', () => {
+                    console.log('click')
                     for (let shipRender of shipsContainer.children) {
                         shipRender.classList.toggle('vertical')
 
@@ -61,6 +62,7 @@ export default class Player {
                     }
                     this.ships.forEach(ship => {
                         ship.vertical = !ship.vertical
+                        console.log('hi',ship.vertical,ship.length)
 
                         if (ship.vertical !== true) {
                             ship.reversed = !ship.reversed
@@ -214,9 +216,8 @@ export default class Player {
         ship.sunk = true
         this.dead.push(ship)
 
-        const square = ship.pos[0]
-        for (let i = 0; i < ship.length; i++) { // mark sink on defense DOM
-            this.board.defense[square + i] = -1
+        for (const square of ship.pos) {
+            this.board.defense[square] = -1
         }
 
         this.events.emit('Sunk', { ship: ship, player: this })
