@@ -9,7 +9,7 @@ export default class Player {
         this.defeated = false
         this.isReal = true
 
-        this.board = new Gameboard(gameSettings.boardLength);
+        this.board = new Gameboard(gameSettings.boardLength, this);
         this._render = null
         this.events = new EventEmitter()
         this.eventsP = eventsP;

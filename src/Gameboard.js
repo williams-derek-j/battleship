@@ -2,8 +2,9 @@ import sort from './sort'
 import disableClick from './disableClick'
 
 export default class Gameboard {
-    constructor(length) {
+    constructor(length, parent) {
         this.length = length
+        this.parent = parent
 
         this.defense = []
         this.offense = []
@@ -46,46 +47,106 @@ export default class Gameboard {
                             square.addEventListener('dragover', (event) => {
                                 event.preventDefault()
 
-                                // const dragged = JSON.parse(event.dataTransfer.getData('text'))
-                                // const len = dragged.length
-                                // const vertical = dragged.vertical
-                                // const reversed = dragged.reversed
+                                const dragged = this.parent.ships.find((ship) => ship.dragging === true )
+                                const len = dragged.length
+                                const vertical = dragged.vertical
+                                const reversed = dragged.reversed
 
-                                square.classList.add('highlighted') // render selected square on DOM immediately
+                                if (boardLength - j >= len) {
+                                    square.classList.add('highlighted') // render selected square on DOM immediately
 
-                                // if (!vertical) {
-                                //     if (!reversed) {
-                                //         for (let k = 0; k < len; k++) {
-                                //             this.renderDefense[i][j + k].classList.add('highlighted')
-                                //         }
-                                //     } else {
-                                //         for (let k = 0; k < len; k++) {
-                                //             this.renderDefense[i][j - k].classList.add('highlighted')
-                                //         }
-                                //     }
-                                // } else {
-                                //     if (!reversed) {
-                                //         for (let k = 0; k < len; k++) {
-                                //             this.renderDefense[i + k][j].classList.add('highlighted')
-                                //         }
-                                //     } else {
-                                //         for (let k = 0; k < len; k++) {
-                                //             this.renderDefense[i - k][j].classList.add('highlighted')
-                                //         }
-                                //     }
-                                // }
+                                    let current = square
+
+                                    if (!vertical) {
+                                        if (!reversed) {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.nextElementSibling
+                                                current.classList.add('highlighted')
+                                            }
+                                        } else {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.previousElementSibling
+                                                current.classList.add('highlighted')
+                                            }
+                                        }
+                                    } else {
+                                        if (!reversed) {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.parentElement.nextElementSibling[j]
+                                                current.classList.add('highlighted')
+                                            }
+                                        } else {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.parentElement.previousElementSibling[j]
+                                                current.classList.add('highlighted')
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    square.classList.add('invalidPlacement') // render selected square on DOM immediately
+
+                                    const short = boardLength - j
+
+                                    let current = square
+
+                                    if (!vertical) {
+                                        if (!reversed) {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.nextElementSibling
+                                                current.classList.add('invalidPlacement')
+                                            }
+                                        } else {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.previousElementSibling
+                                                current.classList.add('invalidPlacement')
+                                            }
+                                        }
+                                    } else {
+                                        if (!reversed) {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.parentElement.nextElementSibling[j]
+                                                current.classList.add('invalidPlacement')
+                                            }
+                                        } else {
+                                            for (let k = 1; k < len; k++) {
+                                                current = current.parentElement.previousElementSibling[j]
+                                                current.classList.add('invalidPlacement')
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // square.dragging = false
                             })
                             square.addEventListener('dragleave', (event) => {
                                 event.preventDefault()
 
-                                const highlights = document.querySelectorAll('.highlighted')
+                                const highlights = document.querySelectorAll('.square.highlighted')
 
                                 highlights.forEach(highlight => {
                                     highlight.classList.remove('highlighted')
                                 })
+
+                                const invalids = document.querySelectorAll('.square.invalidPlacement')
+
+                                invalids.forEach((invalid) => {
+                                    invalid.classList.remove('invalidPlacement')
+                                })
                             })
                             square.addEventListener('drop', (event) => {
                                 event.preventDefault()
+
+                                const highlights = document.querySelectorAll('.square.highlighted')
+
+                                highlights.forEach((highlight) => {
+                                    highlight.classList.remove('highlighted')
+                                })
+
+                                const invalids = document.querySelectorAll('.square.invalidPlacement')
+
+                                invalids.forEach((invalid) => {
+                                    invalid.classList.remove('invalidPlacement')
+                                })
 
                                 const dropped = JSON.parse(event.dataTransfer.getData('text'))
                                 const length = dropped.length

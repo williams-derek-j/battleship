@@ -12,6 +12,8 @@ export default class Ship {
         this.vertical = false
         this.reversed = false
 
+        this.dragging = false
+
         this.events = new EventEmitter()
 
         this._render = null
@@ -61,6 +63,11 @@ export default class Ship {
                     event.dataTransfer.setData('text', JSON.stringify({ length: this.length, vertical: this.vertical, reversed: this.reversed }))
 
                     // render.removeEventListener('dragstart', placeRender)
+
+                    this.dragging = true
+                })
+                renderX.addEventListener('dragend', (event) => {
+                    this.dragging = false
                 })
             }
             this._render = renderX

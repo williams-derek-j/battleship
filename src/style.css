@@ -1,5 +1,9 @@
 ::-webkit-scrollbar { display: none; }
 
+:root {
+    background-color: #353434;
+}
+
 html {
     font-size: 2em;
 }
@@ -265,6 +269,10 @@ div.invalid {
 
 .square.highlighted {
     background-color: #cff000;
+}
+
+.square.invalidPlacement {
+    background-color: #f35976;
 }
 
 .square.occupied {
