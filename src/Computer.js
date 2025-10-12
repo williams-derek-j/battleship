@@ -147,7 +147,7 @@ export default class Computer extends Player {
                     console.log('vert', vertical, 'available', available)
 
                     let mostT = vertical[0] // top of chain of hits
-                    let adjT = mostT - boardLength // available square above top of chain or null
+                    let adjT = mostT - boardLength >= 0 ? mostT - boardLength : null // available square above top of chain or null if off-grid
                     let endT = mostT - boardLength // first unavailable square or end of grid + 1
                     while (available.includes(endT) && endT >= 0) {
                         endT -= boardLength
@@ -155,7 +155,7 @@ export default class Computer extends Player {
                     console.log('t,adjt,endT',mostT,adjT,endT)
 
                     let mostB =  vertical[vertical.length - 1] // bottom of chain of hits
-                    let adjB = mostB + boardLength // available square below below of chain or null
+                    let adjB = mostB + boardLength < boardLength ** 2 ? mostB + boardLength : null // available square below bottom of chain or null if off-grid
                     let endB = mostB + boardLength // first unavailable square or end of grid + 1
                     while (available.includes(endB) && endB < (boardLength ** 2)) {
                         endB += boardLength
@@ -193,15 +193,15 @@ export default class Computer extends Player {
                 let mod = hit - (hit % boardLength)
                 console.log('mod', mod)
 
-                let left = hit - 1
-                let endL = left
+                let left = hit - 1 >= mod ? hit - 1 : null
+                let endL = hit - 1
                 while (available.includes(endL) && endL >= mod) {
                     endL -= 1
                 }
                 console.log('l,endl',left,endL)
 
-                let right = hit + 1
-                let endR = right
+                let right = hit + 1 < mod + boardLength ? hit + 1 : null
+                let endR = hit + 1
                 while (available.includes(endR) && endR < mod + boardLength) {
                     endR += 1
                 }

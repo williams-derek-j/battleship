@@ -76,7 +76,7 @@ export default class Gameboard {
                                         }
                                     }
                                 }
-                                if (array[0] > array[1]) {
+                                if (array[0] > array[1]) { // this is never used, visually-reversed ships don't have reversed arrays
                                     array = sort(array)
                                 }
 
@@ -263,11 +263,6 @@ export default class Gameboard {
 
         if (orientation === 'horizontal') { // check to make sure horizontal boat doesn't wrap
             let mod = (array[0] - (array[0] % boardLength) + boardLength) // find index of square in row
-
-            // let mod = this.length
-            // while (array[0] >= mod) { // determine row: mod * 1 = row 0, mod * 2 = row 1
-            //     mod += this.length
-            // }
 
             for (let square of array) {
                 if (square >= mod) {
