@@ -391,6 +391,7 @@ export default class Gameboard {
 
                 for (let i = 0; i < boardLength; i++) {
                     const row = document.createElement('div')
+                    row.classList.add('row')
 
                     for (let j = 0; j < boardLength; j++) {
                         const index = ((board.children.length * boardLength) + row.children.length)

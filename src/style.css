@@ -10,7 +10,7 @@ html {
 
 body {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 
     justify-content: flex-start;
     align-items: center;
@@ -258,6 +258,8 @@ div.invalid {
 
 .row {
     background-color: black;
+
+    perspective: 800px;
 }
 
 .square {
@@ -267,6 +269,13 @@ div.invalid {
     margin: 0.1rem;
 
     background-color: white;
+}
+
+.square.waiting {
+    background-color: black;
+    opacity: 0;
+
+    transform: scale(0);
 }
 
 .square.highlighted {
@@ -294,15 +303,31 @@ div.invalid {
 }
 
 .square.miss {
+    box-sizing: border-box;
+
     background-color: blue;
+
+    transform: scale(1);
+
+    transition: transform 0.5s cubic-bezier(0.68, -1.5, 0.68, 1);
 }
 
 .square.offense.sunk {
     background-color: #4D0218;
+
+    transform: scale(1);
+
+    transition: transform 0.5s cubic-bezier(0.32, 0, 0.68, 1);
 }
 
 .square.offense.hit {
+    z-index: -1;
+
     background-color: #FFA1AD;
+
+    transform: scale(1);
+
+    transition: transform 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55);
 }
 
 .square.offense.hit.q2 {
