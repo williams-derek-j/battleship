@@ -88,20 +88,19 @@ export default class Game {
                         render.style['z-index'] = -1
                         console.log('test')
 
-                        const result = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
+                        const ship = this.sendAttempt({ square: square, player: player }) // sendAttempt will change attacker and victim board data to be rendered later
 
-                        if (result !== false /*&& !square.classList.contains('sunk')*/) { // render result immediately in attacker DOM
-                            if (result === 1) {
+                        console.log('ship',ship)
+                        if (ship) { // render result immediately in attacker DOM
+                            if (ship.health > 0) {
                                 setTimeout(() => {
                                     render.classList.add('hit')
-                                    render.classList.add(`q${result}`) // 1+ hits
 
                                     render.classList.remove('waiting')
                                 }, 500)
-                            } else if (result === 2) {
+                            } else if (ship.health <= 0) {
                                 setTimeout(() => {
                                     render.classList.add('sunk')
-                                    render.classList.add(`q${result}`) // 1+ hits
 
                                     render.classList.remove('waiting')
                                 }, 500)
@@ -155,21 +154,25 @@ export default class Game {
         const attacker = data.player
 
         let hits = 0
+        let victimShip
         this.players.some(victim => {
             if (victim !== attacker) { // everyone who isn't the player sending the attempt
                 console.log('player about to receive, pID', victim.id, ' data.pID (attacker?)', attacker.id)
 
-                if (victim.receive(data.square) === true) { // victim will send out a hit or miss event to change attacker backend
+                const ship = victim.receive(data.square)
+                console.log('shiphere',ship)
+                if (ship) { // victim will send out a hit or miss event to change attacker backend
                     // attacker.markHit(data.square)
-                    // hits += 1
+                    hits += 1
+                    victimShip = ship
                 }
             }
         })
-        // if (hits > 0) {
-        //     return hits
-        // } else {
-        //     return false
-        // }
+        if (hits > 0) {
+            return victimShip
+        } else {
+            return false
+        }
     }
 
     sendHit(data) {

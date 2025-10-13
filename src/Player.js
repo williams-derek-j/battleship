@@ -155,21 +155,17 @@ export default class Player {
     receive(square) {
         // console.log('receive', square, 'attacker:', attacker, "this:", this)
 
+        let victimShip
         if (this.board.attack(square) === true) { // if true, successful attack is now saved on backend
             for (let ship of this.ships) { // save successful attack on ship itself
                 if (ship.pos.includes(square)) {
-                    ship.health -= 1
+                    this.events.emit("Hit received", { square: square, player: this }) // must send hit event before changing ship, which may send sunk event
 
-                    if (ship.health <= 0) {
-                        this.events.emit("Hit received", { square: square, player: this }) // must send hit event before changing ship, which may send sunk even
-                        this.events.emit("Sunk", { square: square, player: this })
-                    } else {
-                        this.events.emit("Hit received", { square: square, player: this }) // must send hit event before changing ship, which may send sunk even
-                    }
-                    break
+                    ship.health -= 1
+                    victimShip = ship
                 }
             }
-            return true
+            return victimShip
         } else {
             this.events.emit("Miss received", { square: square, player: this })
             return false
