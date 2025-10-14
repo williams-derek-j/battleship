@@ -14,6 +14,7 @@ export default class Game {
 
         this.container = container
         this.events = new EventEmitter()
+        this.hasAI = false
 
         this.players = []
         this.survivors = []
@@ -38,6 +39,7 @@ export default class Game {
 
             this.survivors.push(computer)
             this.players.push(computer)
+            this.hasAI = true
         }
 
         this._turn = 1
@@ -99,11 +101,28 @@ export default class Game {
                                     render.classList.remove('waiting')
                                 }, 500)
                             } else if (ship.health <= 0) {
-                                setTimeout(() => {
-                                    render.classList.add('sunk')
+                                for (const square of ship.pos) {
+                                    const mod = square - (square % boardLength)
+                                    const lastMod = boardLength * (boardLength - 1)
 
-                                    render.classList.remove('waiting')
-                                }, 500)
+                                    const row = (boardLength - 1) - Math.floor((lastMod - mod) / boardLength)
+                                    const column = square - mod
+
+                                    const sR = player.board.renderOffense.children[row].children[column] // victim square in attacker offense DOM (attack history)
+
+                                    for (const name of sR.classList) {
+                                        if (name !== 'square' && name !== 'offense') {
+                                            sR .classList.remove(name)
+                                        }
+                                    }
+                                    sR.classList.add('waiting')
+
+                                    setTimeout(() => {
+                                        sR.classList.add('sunk')
+
+                                        sR.classList.remove('waiting')
+                                    }, 500)
+                                }
                             }
                         } else {
                             setTimeout(() => {
@@ -115,7 +134,11 @@ export default class Game {
 
                         this.turn += 1
 
-                        setTimeout(this.play.bind(this), 1000)
+                        if (this.hasAI === false) {
+                            setTimeout(this.play.bind(this), 1500)
+                        } else {
+                            setTimeout(this.play.bind(this), 1000)
+                        }
                     })
                 } else if (player.isReal === false) {
                     this.events.on('Attack', (square) => {
