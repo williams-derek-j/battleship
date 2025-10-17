@@ -398,6 +398,8 @@ export default class InitGame {
             if (valid) {
                 console.log('****************************form valid')
                 emitter.emit('settings submitted', settings);
+
+                document.documentElement.style.setProperty('--boardLength', boardLength.value)
             } else {
                 console.log('****************************form invalid')
             }

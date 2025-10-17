@@ -5,6 +5,8 @@
 }
 
 html {
+    --boardLength: 8;
+
     font-size: 2em;
 }
 
@@ -12,11 +14,8 @@ body {
     display: flex;
     flex-direction: row;
 
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-
-    width: 99vw;
-    height: fit-content;
 
     box-sizing: border-box;
 
@@ -229,8 +228,8 @@ div.invalid {
     justify-content: center;
     align-items: center;
 
-    width: max-content;
-    height: 99%;
+    /*width: max-content;*/
+    /*height: 99%;*/
 
     box-sizing: border-box;
 
@@ -238,37 +237,64 @@ div.invalid {
 }
 
 .board {
-    display: flex;
-    flex-direction: column;
+    /*--boardLength: var(--boardLength);*/
+    /*flex-direction: column;*/
 
-    width: max-content;
-    height: max-content;
+    /*width: max-content;*/
+    /*height: max-content;*/
+    min-height: 320px;
+    max-width: 2160px;
 
     box-sizing: border-box;
 
-    padding: 0.1rem;
+    /*margin-left: clamp(0rem, calc(100%/(3.5/16)), calc(100%/(3.5/16)));*/
+    /*margin-right: clamp(0rem, calc(100%/(3.5/16)), calc(100%/(3.5/16)));*/
+
+    /*padding: clamp(0rem, 0.1rem, 0.1rem);*/
 
     background-color: black;
 }
 
-.board > div {
-    display: flex;
-    flex-direction: row;
-}
+/*.board > div {*/
+/*    display: flex;*/
+/*    flex-direction: row;*/
+/*}*/
 
 .row {
+    width: 100%;
+    height: calc(100% / var(--boardLength));
+
+    /*min-height: min(calc(100%/ var(--boardLength)), 1rem);*/
+    /*max-width: 100%;*/
+
     background-color: black;
 
     perspective: 800px;
 }
 
-.square {
-    width: 1rem;
-    height: 1rem;
+.row:last-child > .square {
+    margin-bottom: calc((1 / (var(--boardLength) + 1)) * (var(--padding) * 2));
+}
 
-    margin: 0.1rem;
+.square {
+    display: inline-block;
+
+    box-sizing: border-box;
+
+    min-width: min(4rem, calc(95vw / var(--boardLength)), calc(95vh / (var(--boardLength) + 3)));
+    min-height: min(4rem, calc(95vw / var(--boardLength)), calc(95vh / (var(--boardLength) + 3)));
+
+    --padding: min(4rem,calc((100vw / var(--boardLength)) / 2),calc((100vh / var(--boardLength)) / 2));
+    /*padding: var(--padding);*/
+
+    border-left: solid calc((1 / (var(--boardLength) + 1)) * (var(--padding) * 2)) black;
+    border-top: solid calc((1 / (var(--boardLength) + 1)) * (var(--padding) * 2)) black;
 
     background-color: white;
+}
+
+.square:last-child {
+    margin-right: calc((1 / (var(--boardLength) + 1)) * (var(--padding) * 2));
 }
 
 .square.offense:not(.hit):not(.sunk):not(.miss):hover {

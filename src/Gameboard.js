@@ -388,6 +388,8 @@ export default class Gameboard {
                 const board = document.createElement('div')
                 board.classList.add('board')
                 board.classList.add('offense')
+                // document.querySelector('.board').style.setProperty('--boardLength',`${boardLength}`)
+                // board.style.setProperty('--boardLength', `${boardLength}`)
 
                 for (let i = 0; i < boardLength; i++) {
                     const row = document.createElement('div')
